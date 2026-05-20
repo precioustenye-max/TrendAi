@@ -1,14 +1,13 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import SearchModal from './SearchModal';
 import { SearchProvider } from '../context/SearchContext';
 import { SidebarProvider, useSidebar } from '../context/SidebarContext';
+import { ThemeProvider } from '../context/ThemeContext';
 
 function LayoutContent() {
   const { isDesktopOpen, isMobile } = useSidebar();
-  const location = useLocation();
 
   return (
     <div
@@ -29,17 +28,7 @@ function LayoutContent() {
         </div>
         <main className="flex-1">
           <div className="mx-auto w-full max-w-[840px] px-4 py-5 sm:px-5 md:px-7 md:py-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.28 }}
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
+            <Outlet />
           </div>
         </main>
       </div>
@@ -50,10 +39,12 @@ function LayoutContent() {
 
 export default function MainLayout() {
   return (
-    <SearchProvider>
-      <SidebarProvider>
-        <LayoutContent />
-      </SidebarProvider>
-    </SearchProvider>
+    <ThemeProvider>
+      <SearchProvider>
+        <SidebarProvider>
+          <LayoutContent />
+        </SidebarProvider>
+      </SearchProvider>
+    </ThemeProvider>
   );
 }

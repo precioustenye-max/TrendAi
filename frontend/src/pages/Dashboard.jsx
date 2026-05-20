@@ -7,7 +7,6 @@ import {
   ImagePlus,
   ScanSearch,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearch } from '../context/SearchContext';
@@ -34,24 +33,14 @@ export default function Dashboard() {
   ];
 
   return (
-    <motion.div
-      className="pb-8"
-      style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <motion.div className="mb-7" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.05 }}>
+    <div className="pb-8" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+      <div className="mb-7">
         <h1 className="mb-1 text-2xl font-semibold tracking-[-0.03em]" style={{ color: 'var(--foreground)' }}>Dashboard</h1>
         <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Quick overview of your AI-powered trading activity.</p>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="mb-6 overflow-hidden rounded-[24px] border p-5 md:rounded-[28px] md:p-6"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.08 }}
-        whileHover={{ y: -4 }}
         style={{
           borderColor: 'var(--border)',
           background:
@@ -112,33 +101,15 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: {},
-          show: {
-            transition: {
-              staggerChildren: 0.08,
-              delayChildren: 0.12,
-            },
-          },
-        }}
-      >
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div
+            <div
               key={stat.label}
               className="rounded-2xl border px-5 py-4 transition"
-              variants={{
-                hidden: { opacity: 0, y: 18 },
-                show: { opacity: 1, y: 0 },
-              }}
-              whileHover={{ y: -6, scale: 1.01 }}
               style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
             >
               <div className="mb-4 flex items-start justify-between">
@@ -146,18 +117,12 @@ export default function Dashboard() {
                 <Icon className="h-4 w-4" style={{ color: stat.iconColor }} />
               </div>
               <p className="text-3xl font-semibold leading-none tracking-[-0.04em]" style={{ color: 'var(--foreground)' }}>{stat.value}</p>
-            </motion.div>
+            </div>
           );
         })}
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="mb-6 rounded-2xl border p-5"
-        initial={{ opacity: 0, y: 22 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.16 }}
-        style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
-      >
+      <div className="mb-6 rounded-2xl border p-5" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>Secondary flow</h2>
@@ -173,30 +138,22 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-wrap gap-2.5">
           {assets.map((asset) => (
-            <motion.button
+            <button
               key={asset}
               onClick={() => setSelectedAsset(asset)}
               className="rounded-xl px-4 py-2 font-mono text-sm font-semibold transition"
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.98 }}
               style={{
                 backgroundColor: selectedAsset === asset ? 'var(--primary)' : 'var(--secondary)',
                 color: selectedAsset === asset ? 'var(--primary-foreground)' : 'var(--foreground)',
               }}
             >
               {asset}
-            </motion.button>
+            </button>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="overflow-hidden rounded-2xl border"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.2 }}
-        style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
-      >
+      <div className="overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
         <div className="flex items-center gap-2 border-b px-5 py-4" style={{ borderColor: 'var(--border)' }}>
           <Clock3 className="h-4 w-4" style={{ color: 'var(--muted-foreground)' }} />
           <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Recent activity</h2>
@@ -204,13 +161,9 @@ export default function Dashboard() {
 
         <div>
           {recentActivity.map((activity, index) => (
-            <motion.div
+            <div
               key={`${activity.asset}-${index}`}
               className="flex items-center justify-between gap-4 border-b px-5 py-4 last:border-b-0"
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.28, delay: 0.24 + index * 0.05 }}
-              whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
               style={{ borderColor: 'var(--border)' }}
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -235,10 +188,10 @@ export default function Dashboard() {
                 </span>
                 <span className="w-8 text-right text-xs" style={{ color: 'var(--muted-foreground)' }}>{activity.percentage}</span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
