@@ -13,7 +13,7 @@ export default function Sidebar() {
   const { closeSidebar, isMobile, isOpen } = useSidebar();
 
   const menuItems = [
-    { label: 'Dashboard', path: '/', icon: BarChart3 },
+    { label: 'Dashboard', path: '/dashboard', icon: BarChart3 },
     { label: 'Ai Analysis', path: '/ai-analysis', icon: Sparkles },
     { label: 'Screenshot AI', path: '/chat-analyzer', icon: CandlestickChart },
     { label: 'History', path: '/history', icon: History },
@@ -90,7 +90,7 @@ export default function Sidebar() {
                 <li key={item.path}>
                   <NavLink
                     to={item.path}
-                    end={item.path === '/'}
+                    end={item.path === '/dashboard'}
                     title={item.label}
                     onClick={() => {
                       if (isMobile) {
