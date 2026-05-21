@@ -5,6 +5,7 @@ import {
   Eye,
   ImagePlus,
   Layers3,
+  Menu,
   MessageCircle,
   Moon,
   Music2,
@@ -14,9 +15,11 @@ import {
   Sun,
   Target,
   Users,
+  X,
   Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -108,6 +111,7 @@ const stagger = {
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isLight = theme === 'light';
   const heroShellBackground = isLight
     ? 'radial-gradient(circle at 50% 84%, rgba(24, 210, 107, 0.14), transparent 18%), radial-gradient(circle at 22% 92%, rgba(245, 158, 11, 0.12), transparent 16%), radial-gradient(circle at 78% 80%, rgba(96, 165, 250, 0.16), transparent 22%), radial-gradient(circle at top left, rgba(24, 210, 107, 0.08), transparent 20%), radial-gradient(circle at top right, rgba(96, 165, 250, 0.08), transparent 22%), radial-gradient(rgba(37,99,235,0.08) 1px, transparent 1px)'
@@ -136,6 +140,7 @@ export default function Home() {
     ? 'inset 0 0 0 1px rgba(15,23,42,0.06), 0 12px 30px rgba(148,163,184,0.18)'
     : 'inset 0 0 0 1px rgba(255,255,255,0.05)';
   const logoAltTile = isLight ? 'rgba(15,23,42,0.22)' : 'rgba(255,255,255,0.8)';
+  const navLinkHref = (item) => `#${item.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
     <div
@@ -172,47 +177,64 @@ export default function Home() {
             initial={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.45, delay: 0.05 }}
           >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <Link to="/" className="inline-flex items-center gap-3">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  className="grid h-9 w-9 grid-cols-3 gap-1 rounded-xl p-2"
-                  transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{
-                    backgroundColor: logoTileBackground,
-                    boxShadow: logoTileShadow,
-                  }}
-                >
-                  {Array.from({ length: 9 }).map((_, index) => (
-                    <span
-                      key={index}
-                      className="rounded-[2px]"
-                      style={{
-                        backgroundColor: index % 3 === 1 ? 'var(--primary)' : logoAltTile,
-                      }}
-                    />
-                  ))}
-                </motion.div>
-                <span className="text-xl font-semibold tracking-[-0.03em]">NeuralTrade</span>
-              </Link>
-
-              <nav className="flex flex-wrap items-center justify-center gap-3 text-sm" style={{ color: dimText }}>
-                {navItems.map((item) => (
-                  <a
-                    key={item}
-                    href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="transition"
-                    style={{ color: 'inherit' }}
+            <div className="relative flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-4">
+                <Link to="/" className="inline-flex min-w-0 items-center gap-3">
+                  <motion.div
+                    animate={{ y: [0, -4, 0] }}
+                    className="grid h-9 w-9 shrink-0 grid-cols-3 gap-1 rounded-xl p-2"
+                    transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{
+                      backgroundColor: logoTileBackground,
+                      boxShadow: logoTileShadow,
+                    }}
                   >
-                    {item}
-                  </a>
-                ))}
-              </nav>
+                    {Array.from({ length: 9 }).map((_, index) => (
+                      <span
+                        key={index}
+                        className="rounded-[2px]"
+                        style={{
+                          backgroundColor: index % 3 === 1 ? 'var(--primary)' : logoAltTile,
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                  <span className="truncate text-xl font-semibold tracking-[-0.03em]">NeuralTrade</span>
+                </Link>
 
-              <div className="flex items-center gap-3">
+                <nav className="hidden items-center justify-center gap-6 text-sm md:flex" style={{ color: dimText }}>
+                  {navItems.map((item) => (
+                    <a
+                      key={item}
+                      href={navLinkHref(item)}
+                      className="transition"
+                      style={{ color: 'inherit' }}
+                    >
+                      {item}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen((open) => !open)}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border transition hover:scale-[1.03] md:hidden"
+                  style={{
+                    borderColor: 'var(--border)',
+                    backgroundColor: ghostButtonBackground,
+                    color: 'var(--foreground)',
+                    boxShadow: `inset 0 0 0 1px ${ghostButtonBorder}`,
+                  }}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                >
+                  {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </button>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition hover:scale-[1.02]"
+                  className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-semibold transition hover:scale-[1.02] sm:px-4"
                   style={{
                     background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.18), rgba(24, 210, 107, 0.14))',
                     boxShadow: 'inset 0 0 0 1px rgba(96,165,250,0.14), 0 0 28px rgba(96,165,250,0.1)',
@@ -237,6 +259,35 @@ export default function Home() {
                   {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </button>
               </div>
+
+              {isMobileMenuOpen ? (
+                <div
+                  className="absolute left-0 right-0 top-full z-20 mt-3 md:hidden"
+                  style={{
+                    background: secondaryPanelBackground,
+                    boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                    borderRadius: '24px',
+                  }}
+                >
+                  <nav className="flex flex-col gap-1 p-3 text-sm" style={{ color: strongText }}>
+                    {navItems.map((item) => (
+                      <a
+                        key={item}
+                        href={navLinkHref(item)}
+                        className="rounded-2xl px-4 py-3 transition"
+                        style={{
+                          backgroundColor: ghostButtonBackground,
+                          boxShadow: `inset 0 0 0 1px ${ghostButtonBorder}`,
+                          color: 'inherit',
+                        }}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item}
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+              ) : null}
             </div>
           </motion.header>
 
