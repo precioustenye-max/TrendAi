@@ -64,7 +64,7 @@ export default function Sidebar() {
                 }`}
                 style={{ color: 'var(--foreground)' }}
               >
-                NeuralTrade
+                TrendAi
               </span>
             </div>
 

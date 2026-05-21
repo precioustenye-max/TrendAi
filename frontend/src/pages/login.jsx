@@ -69,7 +69,7 @@ export default function LogIn() {
                 ))}
               </div>
               <span className="text-xl font-semibold tracking-[-0.03em] text-white">
-                NeuralTrade
+                TrendAi
               </span>
             </Link>
 
@@ -161,7 +161,7 @@ export default function LogIn() {
                   ))}
                 </div>
                 <span className="text-xl font-semibold tracking-[-0.03em] text-white">
-                  NeuralTrade
+                  TrendAi
                 </span>
               </Link>
             </div>
@@ -175,7 +175,7 @@ export default function LogIn() {
             >
               <p className="text-sm font-medium text-white/48">Welcome back</p>
               <h2 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-white">
-                Sign in to NeuralTrade
+                Sign in to TrendAi
               </h2>
               <p className="mt-3 text-sm leading-6 text-white/62">
                 Use your email and password or continue with Google.

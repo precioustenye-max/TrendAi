@@ -89,9 +89,9 @@ const edgePoints = [
 ];
 
 const socialLinks = [
-  { label: 'TikTok', href: 'https://www.tiktok.com/@neuraltrade.ai', icon: Music2 },
-  { label: 'Instagram', href: 'https://www.instagram.com/neuraltrade.ai', icon: Camera },
-  { label: 'Facebook', href: 'https://www.facebook.com/neuraltradeai', icon: Users },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@trendai', icon: Music2 },
+  { label: 'Instagram', href: 'https://www.instagram.com/trendai', icon: Camera },
+  { label: 'Facebook', href: 'https://www.facebook.com/trendai', icon: Users },
   { label: 'WhatsApp', href: 'https://wa.me/1234567890', icon: MessageCircle },
 ];
 
@@ -199,7 +199,7 @@ export default function Home() {
                       />
                     ))}
                   </motion.div>
-                  <span className="truncate text-xl font-semibold tracking-[-0.03em]">NeuralTrade</span>
+                  <span className="truncate text-xl font-semibold tracking-[-0.03em]">TrendAi</span>
                 </Link>
 
                 <nav className="hidden items-center justify-center gap-6 text-sm md:flex" style={{ color: dimText }}>
@@ -355,7 +355,7 @@ export default function Home() {
                   className="mx-auto mt-5 max-w-[620px] text-sm leading-7 sm:text-base"
                   style={{ color: subtleText }}
                 >
-                  NeuralTrade helps you move from chart screenshot to a clean trade plan fast. Get the execution first, then scroll for more or open the deeper explanation when you need it.
+                  TrendAi helps you move from chart screenshot to a clean trade plan fast. Get the execution first, then scroll for more or open the deeper explanation when you need it.
                 </motion.p>
 
                 <motion.div
@@ -438,7 +438,7 @@ export default function Home() {
                   >
                     <div className="mb-4 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: fadedText }}>
                       <span>Execution chart</span>
-                      <span>NeuralTrade</span>
+                      <span>TrendAi</span>
                     </div>
 
                     <div
@@ -586,7 +586,7 @@ export default function Home() {
                   Built to reduce delay between chart analysis and action.
                 </h2>
                 <p className="mt-4 max-w-xl text-sm leading-7" style={{ color: subtleText }}>
-                  Most trading tools overload the first screen. NeuralTrade pushes the highest-value action to the front, then reveals the extra reasoning underneath.
+                  Most trading tools overload the first screen. TrendAi pushes the highest-value action to the front, then reveals the extra reasoning underneath.
                 </p>
               </motion.div>
 
@@ -685,7 +685,7 @@ export default function Home() {
                       }}
                     >
                       <ShieldCheck className="h-3.5 w-3.5" />
-                      NeuralTrade edge
+                      TrendAi edge
                     </div>
                     <h2 className="mt-5 text-3xl font-semibold tracking-[-0.05em]" style={{ color: strongText }}>
                       A sharper first screen for traders who want clarity fast.
@@ -748,7 +748,7 @@ export default function Home() {
                       />
                     ))}
                   </div>
-                  <span className="text-xl font-semibold tracking-[-0.03em]" style={{ color: strongText }}>NeuralTrade</span>
+                  <span className="text-xl font-semibold tracking-[-0.03em]" style={{ color: strongText }}>TrendAi</span>
                 </div>
                 <p className="mt-4 max-w-sm text-sm leading-7" style={{ color: dimText }}>
                   Screenshot-first market intelligence for traders who want clean execution planning without dashboard clutter.

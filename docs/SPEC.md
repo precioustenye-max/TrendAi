@@ -1,6 +1,6 @@
-# NeuralTrade — Product Specification
+# TrendAi — Product Specification
 
-> A complete, exhaustive blueprint to reproduce the NeuralTrade application from scratch.
+> A complete, exhaustive blueprint to reproduce the TrendAi application from scratch.
 
 ---
 
@@ -8,12 +8,12 @@
 
 | Field | Value |
 |---|---|
-| **App name** | **NeuralTrade** |
+| **App name** | **TrendAi** |
 | **Tagline** | AI Trading Analysis Platform |
 | **Description** | AI-powered trading analysis platform with real-time signals, SMC/ICT analysis, and Gemini Vision. Educational tool — not financial advice. |
 | **Logo mark** | Solid green rounded square with a white chart icon |
 | **Wordmark** | `NEURAL` + `TRADE` |
-| **HTML title** | `NeuralTrade — AI Trading Analysis Platform` |
+| **HTML title** | `TrendAi — AI Trading Analysis Platform` |
 | **Meta description** | AI-powered trading analysis platform with SMC/ICT methodology |
 | **Global disclaimer** | "AI insights are educational. Not financial advice." |
 

@@ -69,7 +69,7 @@ export default function Register() {
                   ))}
                 </div>
                 <span className="text-xl font-semibold tracking-[-0.03em] text-white">
-                  NeuralTrade
+                  TrendAi
                 </span>
               </Link>
             </div>
@@ -83,7 +83,7 @@ export default function Register() {
             >
               <p className="text-sm font-medium text-white/48">Start your account</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-white">
-                Create your NeuralTrade profile
+                Create your TrendAi profile
               </h1>
               <p className="mt-3 text-sm leading-6 text-white/62">
                 Join with email or choose Google for faster onboarding.
@@ -247,7 +247,7 @@ export default function Register() {
                 ))}
               </div>
               <span className="text-xl font-semibold tracking-[-0.03em] text-white">
-                NeuralTrade
+                TrendAi
               </span>
             </Link>
 
