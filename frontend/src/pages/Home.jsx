@@ -291,11 +291,11 @@ export default function Home() {
                   className="mt-6 text-[2.8rem] font-semibold leading-[0.96] tracking-[-0.06em] sm:text-[4rem] lg:text-[5.1rem]"
                   style={{ color: heroTitleColor }}
                 >
-                  AI that reads
+                 Precision
                   <br />
-                  the market before
+                  Trading 
                   <br />
-                  you enter
+                   starts here.
                 </motion.h1>
 
                 <motion.p
