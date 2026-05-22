@@ -1,0 +1,31 @@
+<svg width="1200" height="780" viewBox="0 0 1200 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="780" rx="36" fill="#081019"/>
+  <rect x="36" y="36" width="1128" height="708" rx="30" fill="url(#bg2)"/>
+  <rect x="84" y="84" width="1032" height="610" rx="30" fill="#0D1826"/>
+  <rect x="118" y="118" width="238" height="16" rx="8" fill="#D8E6F5"/>
+  <rect x="118" y="148" width="176" height="10" rx="5" fill="#5F7390"/>
+  <rect x="118" y="206" width="620" height="430" rx="28" fill="#0A1320"/>
+  <path d="M158 544C214 518 274 504 332 466C414 411 432 344 520 334C582 327 620 350 698 286" stroke="#60A5FA" stroke-width="8" stroke-linecap="round"/>
+  <path d="M158 576C234 558 316 588 396 532C462 485 494 426 574 416C622 410 672 424 714 394" stroke="#F59E0B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M158 612H714" stroke="#20324A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M158 244V612" stroke="#20324A" stroke-width="3" stroke-linecap="round"/>
+  <rect x="774" y="206" width="300" height="176" rx="24" fill="#111F31"/>
+  <rect x="804" y="236" width="142" height="14" rx="7" fill="#D8E6F5"/>
+  <rect x="804" y="266" width="220" height="10" rx="5" fill="#5D718C"/>
+  <circle cx="838" cy="324" r="26" fill="#22C55E" fill-opacity="0.2" stroke="#22C55E" stroke-width="4"/>
+  <path d="M824 324L835 335L854 312" stroke="#22C55E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="886" y="331" fill="#D8E6F5" font-family="Arial, sans-serif" font-size="28">BOS confirmed</text>
+  <rect x="774" y="402" width="300" height="234" rx="24" fill="#111F31"/>
+  <rect x="804" y="432" width="164" height="14" rx="7" fill="#D8E6F5"/>
+  <rect x="804" y="470" width="240" height="20" rx="10" fill="#1D2E44"/>
+  <rect x="804" y="504" width="200" height="20" rx="10" fill="#1D2E44"/>
+  <rect x="804" y="538" width="228" height="20" rx="10" fill="#1D2E44"/>
+  <rect x="804" y="572" width="152" height="20" rx="10" fill="#1D2E44"/>
+  <text x="804" y="614" fill="#95A8C1" font-family="Arial, sans-serif" font-size="22">Structure, liquidity, zones</text>
+  <defs>
+    <linearGradient id="bg2" x1="96" y1="54" x2="1130" y2="724" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1727"/>
+      <stop offset="1" stop-color="#061018"/>
+    </linearGradient>
+  </defs>
+</svg>

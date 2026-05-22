@@ -1,0 +1,33 @@
+<svg width="1200" height="780" viewBox="0 0 1200 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="780" rx="36" fill="#08111B"/>
+  <rect x="36" y="36" width="1128" height="708" rx="30" fill="url(#bg3)"/>
+  <rect x="84" y="84" width="1032" height="610" rx="30" fill="#0D1827"/>
+  <rect x="122" y="122" width="220" height="16" rx="8" fill="#D8E6F5"/>
+  <rect x="122" y="152" width="180" height="10" rx="5" fill="#607490"/>
+  <rect x="122" y="206" width="418" height="420" rx="28" fill="#101D30"/>
+  <rect x="570" y="206" width="506" height="420" rx="28" fill="#0A1320"/>
+  <rect x="154" y="244" width="170" height="18" rx="9" fill="#D8E6F5"/>
+  <rect x="154" y="286" width="114" height="66" rx="18" fill="#22C55E"/>
+  <text x="188" y="329" fill="#04120B" font-family="Arial, sans-serif" font-size="30" font-weight="700">BUY</text>
+  <rect x="154" y="382" width="210" height="18" rx="9" fill="#20324A"/>
+  <rect x="154" y="416" width="178" height="18" rx="9" fill="#20324A"/>
+  <rect x="154" y="450" width="196" height="18" rx="9" fill="#20324A"/>
+  <rect x="154" y="514" width="242" height="74" rx="22" fill="#121F31"/>
+  <text x="188" y="558" fill="#D8E6F5" font-family="Arial, sans-serif" font-size="26">Entry, SL, TP</text>
+  <path d="M614 538C680 478 744 462 806 412C862 367 924 324 1030 286" stroke="#22C55E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M614 574H1030" stroke="#20324A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M614 262V574" stroke="#20324A" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="866" cy="370" r="12" fill="#F59E0B"/>
+  <rect x="700" y="318" width="124" height="40" rx="14" fill="#13263A"/>
+  <text x="726" y="344" fill="#D8E6F5" font-family="Arial, sans-serif" font-size="20">Target 1</text>
+  <rect x="852" y="244" width="140" height="40" rx="14" fill="#13263A"/>
+  <text x="877" y="270" fill="#D8E6F5" font-family="Arial, sans-serif" font-size="20">Target 2</text>
+  <rect x="122" y="650" width="954" height="16" rx="8" fill="#121E2F"/>
+  <text x="122" y="722" fill="#95A8C1" font-family="Arial, sans-serif" font-size="24">Execute the plan, then open the deeper rationale if needed.</text>
+  <defs>
+    <linearGradient id="bg3" x1="96" y1="56" x2="1126" y2="726" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1727"/>
+      <stop offset="1" stop-color="#071019"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -2,6 +2,8 @@ import {
   ArrowRight,
   Camera,
   CandlestickChart,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   ImagePlus,
   Layers3,
@@ -19,8 +21,11 @@ import {
   Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import howStep2 from '../assets/how-step-2.svg';
+import trendAiUserTrade from '../assets/trendai-user-trade.jpg';
+import trendAiUserUpload from '../assets/trendai-user-upload.jpg';
 import { useTheme } from '../context/ThemeContext';
 
 const navItems = ['Home', 'Features', 'How It Works', 'Edge'];
@@ -64,21 +69,27 @@ const lowerCards = [
 const workflowSteps = [
   {
     step: '01',
-    title: 'Drop a chart',
-    text: 'Start with the screenshot, not a blank form. The product is built around the fastest path from image to decision.',
+    title: 'Upload your chart screenshot',
+    text: 'The user opens TrendAi chat and uploads a chart screenshot directly from their phone or trading screen.',
     icon: ImagePlus,
+    image: trendAiUserUpload,
+    imageAlt: 'User holding a trading chart screenshot ready to upload into TrendAi',
   },
   {
     step: '02',
-    title: 'Read the structure',
-    text: 'The engine maps liquidity, structure breaks, order blocks, and key zones before producing a bias.',
+    title: 'TrendAi returns the signal',
+    text: 'TrendAi analyzes the screenshot, reads the structure, and responds with a clean signal, entry zone, stop loss, and targets.',
     icon: Layers3,
+    image: howStep2,
+    imageAlt: 'TrendAi analysis view showing the signal and structure breakdown',
   },
   {
     step: '03',
-    title: 'Execute with context',
-    text: 'Receive a concise trade plan first, then open the deeper rationale when you need more detail.',
+    title: 'Take the trade with confidence',
+    text: 'The user follows the TrendAi setup and executes the trade using the signal and levels provided by the platform.',
     icon: Target,
+    image: trendAiUserTrade,
+    imageAlt: 'User taking a trade after receiving a TrendAi signal',
   },
 ];
 
@@ -112,6 +123,7 @@ const stagger = {
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeWorkflowStep, setActiveWorkflowStep] = useState(0);
   const isLight = theme === 'light';
   const heroShellBackground = isLight
     ? 'radial-gradient(circle at 50% 84%, rgba(24, 210, 107, 0.14), transparent 18%), radial-gradient(circle at 22% 92%, rgba(245, 158, 11, 0.12), transparent 16%), radial-gradient(circle at 78% 80%, rgba(96, 165, 250, 0.16), transparent 22%), radial-gradient(circle at top left, rgba(24, 210, 107, 0.08), transparent 20%), radial-gradient(circle at top right, rgba(96, 165, 250, 0.08), transparent 22%), radial-gradient(rgba(37,99,235,0.08) 1px, transparent 1px)'
@@ -141,6 +153,22 @@ export default function Home() {
     : 'inset 0 0 0 1px rgba(255,255,255,0.05)';
   const logoAltTile = isLight ? 'rgba(15,23,42,0.22)' : 'rgba(255,255,255,0.8)';
   const navLinkHref = (item) => `#${item.toLowerCase().replace(/\s+/g, '-')}`;
+
+  const goToPrevWorkflowStep = () => {
+    setActiveWorkflowStep((current) => (current === 0 ? workflowSteps.length - 1 : current - 1));
+  };
+
+  const goToNextWorkflowStep = () => {
+    setActiveWorkflowStep((current) => (current === workflowSteps.length - 1 ? 0 : current + 1));
+  };
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveWorkflowStep((current) => (current === workflowSteps.length - 1 ? 0 : current + 1));
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   return (
     <div
@@ -557,7 +585,7 @@ export default function Home() {
 
             <motion.section
               id="how-it-works"
-              className="container mx-auto mt-8 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]"
+              className="relative left-1/2 right-1/2 mt-8 w-screen -translate-x-1/2"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.2 }}
@@ -565,68 +593,163 @@ export default function Home() {
             >
               <motion.div
                 variants={fadeUp}
-                className="rounded-[32px] p-6 md:p-8"
+                className="mx-auto overflow-hidden rounded-[34px] px-4 sm:px-6 md:px-8"
                 style={{
-                  background: secondaryPanelBackground,
+                  background: isLight
+                    ? 'linear-gradient(135deg, rgba(32,39,70,0.96), rgba(78,95,70,0.84) 58%, rgba(218,244,120,0.84))'
+                    : 'linear-gradient(135deg, rgba(10,14,22,0.98), rgba(39,52,46,0.94) 58%, rgba(183,219,94,0.84))',
                   boxShadow: `inset 0 0 0 1px ${borderGlow}`,
                 }}
               >
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
-                  style={{
-                    backgroundColor: 'rgba(24,210,107,0.08)',
-                    color: 'var(--chart-green)',
-                    boxShadow: 'inset 0 0 0 1px rgba(24,210,107,0.16)',
-                  }}
-                >
-                  <Zap className="h-3.5 w-3.5" />
-                  How it works
-                </div>
-                <h2 className="mt-5 text-3xl font-semibold tracking-[-0.05em]" style={{ color: strongText }}>
-                  Built to reduce delay between chart analysis and action.
-                </h2>
-                <p className="mt-4 max-w-xl text-sm leading-7" style={{ color: subtleText }}>
-                  Most trading tools overload the first screen. TrendAi pushes the highest-value action to the front, then reveals the extra reasoning underneath.
-                </p>
-              </motion.div>
+                <div className="flex items-center justify-between gap-3 px-4 pb-0 pt-4 sm:px-6 sm:pt-6">
+                  <div
+                    className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                    style={{
+                      backgroundColor: 'rgba(255,255,255,0.08)',
+                      color: '#ECF4FF',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    How TrendAi Works
+                  </div>
 
-              <motion.div variants={fadeUp} className="grid gap-4">
-                {workflowSteps.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.div
-                      key={item.step}
-                      whileHover={{ x: 6 }}
-                      className="rounded-[28px] p-5"
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={goToPrevWorkflowStep}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full transition sm:h-11 sm:w-11"
                       style={{
-                        backgroundColor: cardBackground,
-                        boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                        backgroundColor: 'rgba(255,255,255,0.08)',
+                        color: '#E5EEF8',
+                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
                       }}
+                      aria-label="Previous workflow step"
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="inline-flex rounded-2xl p-3"
-                            style={{
-                              backgroundColor: 'rgba(96,165,250,0.08)',
-                              color: 'var(--chart-blue)',
-                              boxShadow: 'inset 0 0 0 1px rgba(96,165,250,0.14)',
-                            }}
-                          >
-                            <Icon className="h-5 w-5" />
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={goToNextWorkflowStep}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full transition sm:h-11 sm:w-11"
+                      style={{
+                        backgroundColor: 'rgba(255,255,255,0.08)',
+                        color: '#E5EEF8',
+                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                      }}
+                      aria-label="Next workflow step"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative mt-4 overflow-hidden">
+                  <motion.div
+                    className="flex"
+                    animate={{ x: `-${activeWorkflowStep * 100}%` }}
+                    transition={{ duration: 0.55, ease: 'easeInOut' }}
+                  >
+                    {workflowSteps.map((item) => {
+                      const Icon = item.icon;
+
+                      return (
+                        <div key={item.step} className="min-w-full">
+                          <div className="grid min-h-[560px] gap-8 px-5 py-7 sm:px-6 md:min-h-[620px] md:px-8 md:py-10 lg:grid-cols-[1fr_0.96fr] lg:items-center xl:px-14">
+                            <div className="order-2 flex flex-col justify-center lg:order-1">
+                              <div
+                                className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
+                                style={{
+                                  backgroundColor: 'rgba(255,255,255,0.08)',
+                                  color: '#D6F7E7',
+                                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                                }}
+                              >
+                                <Icon className="h-4 w-4" />
+                                Step {item.step}
+                              </div>
+
+                              <h2 className="mt-5 max-w-[11ch] text-4xl font-semibold leading-[0.97] tracking-[-0.06em] text-white sm:text-5xl lg:text-[4.1rem]">
+                                {item.title}
+                              </h2>
+
+                              <p className="mt-5 max-w-[620px] text-base leading-8 text-white/78 sm:text-lg">
+                                {item.text}
+                              </p>
+
+                              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                                <Link
+                                  to="/chat-analyzer"
+                                  className="inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                                  style={{ backgroundColor: 'var(--primary)' }}
+                                >
+                                  Upload Screenshot
+                                </Link>
+                                <Link
+                                  to="/dashboard"
+                                  className="inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
+                                  style={{
+                                    backgroundColor: 'rgba(255,255,255,0.08)',
+                                    color: '#F8FBFF',
+                                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                                  }}
+                                >
+                                  Open Dashboard
+                                </Link>
+                              </div>
+                            </div>
+
+                            <div className="order-1 flex items-center justify-center lg:order-2">
+                              <div
+                                className="relative w-full max-w-[650px] overflow-hidden rounded-[28px] p-4"
+                                style={{
+                                  backgroundColor: 'rgba(8,12,18,0.72)',
+                                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                                }}
+                              >
+                                <div
+                                  className="mb-4 flex items-center justify-between rounded-[18px] px-4 py-3 text-sm font-semibold"
+                                  style={{
+                                    backgroundColor: 'rgba(255,255,255,0.05)',
+                                    color: '#DCE7F5',
+                                  }}
+                                >
+                                  <span>TrendAi Workflow</span>
+                                  <span style={{ color: '#9CC6FF' }}>Step preview</span>
+                                </div>
+                                <img
+                                  src={item.image}
+                                  alt={item.imageAlt}
+                                  className="h-[280px] w-full rounded-[22px] object-cover sm:h-[340px] lg:h-[390px]"
+                                />
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: fadedText }}>
-                            Step {item.step}
-                          </span>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold" style={{ color: strongText }}>{item.title}</h3>
-                          <p className="mt-2 text-sm leading-6" style={{ color: subtleText }}>{item.text}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                      );
+                    })}
+                  </motion.div>
+                </div>
+
+                <div className="flex items-center justify-center gap-2.5 px-4 pb-6 pt-5 sm:px-6">
+                  {workflowSteps.map((item, index) => {
+                    const isActive = index === activeWorkflowStep;
+
+                    return (
+                      <button
+                        key={item.step}
+                        type="button"
+                        onClick={() => setActiveWorkflowStep(index)}
+                        className="h-2.5 rounded-full transition"
+                        style={{
+                          width: isActive ? '2.75rem' : '0.65rem',
+                          backgroundColor: isActive ? 'var(--primary)' : 'rgba(255,255,255,0.28)',
+                        }}
+                        aria-label={`Go to step ${item.step}`}
+                      />
+                    );
+                  })}
+                </div>
               </motion.div>
             </motion.section>
 
