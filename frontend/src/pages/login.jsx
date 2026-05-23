@@ -271,10 +271,13 @@ export default function LogIn() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full rounded-2xl border px-4 py-3 text-sm outline-none transition"
+                    className="w-full rounded-2xl border px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition"
                     style={{
                       backgroundColor: 'rgba(255,255,255,0.04)',
                       borderColor: 'rgba(255,255,255,0.08)',
+                      color: '#ffffff',
+                      WebkitTextFillColor: '#ffffff',
+                      caretColor: '#ffffff',
                     }}
                     required
                   />
@@ -297,10 +300,13 @@ export default function LogIn() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition"
+                      className="w-full rounded-2xl border px-4 py-3 pr-12 text-sm text-white placeholder:text-white/30 outline-none transition"
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.04)',
                         borderColor: 'rgba(255,255,255,0.08)',
+                        color: '#ffffff',
+                        WebkitTextFillColor: '#ffffff',
+                        caretColor: '#ffffff',
                       }}
                       required
                     />

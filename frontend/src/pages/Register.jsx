@@ -181,10 +181,13 @@ export default function Register() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="John Doe"
-                    className="w-full rounded-2xl border px-4 py-3 text-sm outline-none transition"
+                    className="w-full rounded-2xl border px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition"
                     style={{
                       backgroundColor: 'rgba(255,255,255,0.04)',
                       borderColor: 'rgba(255,255,255,0.08)',
+                      color: '#ffffff',
+                      WebkitTextFillColor: '#ffffff',
+                      caretColor: '#ffffff',
                     }}
                     required
                   />
@@ -197,10 +200,13 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full rounded-2xl border px-4 py-3 text-sm outline-none transition"
+                    className="w-full rounded-2xl border px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition"
                     style={{
                       backgroundColor: 'rgba(255,255,255,0.04)',
                       borderColor: 'rgba(255,255,255,0.08)',
+                      color: '#ffffff',
+                      WebkitTextFillColor: '#ffffff',
+                      caretColor: '#ffffff',
                     }}
                     required
                   />
@@ -214,10 +220,13 @@ export default function Register() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Create a password"
-                      className="w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition"
+                      className="w-full rounded-2xl border px-4 py-3 pr-12 text-sm text-white placeholder:text-white/30 outline-none transition"
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.04)',
                         borderColor: 'rgba(255,255,255,0.08)',
+                        color: '#ffffff',
+                        WebkitTextFillColor: '#ffffff',
+                        caretColor: '#ffffff',
                       }}
                       required
                     />
@@ -240,10 +249,13 @@ export default function Register() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat your password"
-                      className="w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition"
+                      className="w-full rounded-2xl border px-4 py-3 pr-12 text-sm text-white placeholder:text-white/30 outline-none transition"
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.04)',
                         borderColor: 'rgba(255,255,255,0.08)',
+                        color: '#ffffff',
+                        WebkitTextFillColor: '#ffffff',
+                        caretColor: '#ffffff',
                       }}
                       required
                     />
