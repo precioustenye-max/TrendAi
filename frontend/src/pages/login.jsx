@@ -1,6 +1,8 @@
 import { ArrowRight, BarChart3, Eye, EyeOff, Globe, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 const trustPoints = [
   'Screenshot-based trade analysis',
@@ -9,13 +11,48 @@ const trustPoints = [
 ];
 
 export default function LogIn() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login:', { email, password });
+
+    setIsSubmitting(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Auth API route was not found. Restart the backend server on the latest code.');
+        }
+        throw new Error(data.message || data.error || 'Unable to sign in');
+      }
+
+      localStorage.setItem('trendai_token', data.token);
+      localStorage.setItem('trendai_user', JSON.stringify(data.user));
+      setSuccessMessage('Login successful. Redirecting to dashboard...');
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -201,6 +238,32 @@ export default function LogIn() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {errorMessage ? (
+                  <div
+                    className="rounded-2xl px-4 py-3 text-sm"
+                    style={{
+                      backgroundColor: 'rgba(239,68,68,0.12)',
+                      color: '#fca5a5',
+                      boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.18)',
+                    }}
+                  >
+                    {errorMessage}
+                  </div>
+                ) : null}
+
+                {successMessage ? (
+                  <div
+                    className="rounded-2xl px-4 py-3 text-sm"
+                    style={{
+                      backgroundColor: 'rgba(34,197,94,0.12)',
+                      color: '#86efac',
+                      boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.18)',
+                    }}
+                  >
+                    {successMessage}
+                  </div>
+                ) : null}
+
                 <div>
                   <label className="mb-2 block text-sm font-medium text-white/72">Email</label>
                   <input
@@ -254,10 +317,14 @@ export default function LogIn() {
 
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-                  style={{ backgroundColor: 'var(--primary)' }}
+                  style={{
+                    backgroundColor: 'var(--primary)',
+                    opacity: isSubmitting ? 0.7 : 1,
+                  }}
                 >
-                  Sign In
+                  {isSubmitting ? 'Signing In...' : 'Sign In'}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </form>

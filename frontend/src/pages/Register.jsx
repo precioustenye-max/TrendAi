@@ -1,6 +1,8 @@
 import { ArrowRight, Eye, EyeOff, Globe, Sparkles, UserPlus } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 const benefits = [
   'Create your personalized analysis dashboard',
@@ -9,20 +11,57 @@ const benefits = [
 ];
 
 export default function Register() {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setErrorMessage('');
+    setSuccessMessage('');
+
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setErrorMessage('Passwords do not match');
       return;
     }
-    console.log('Register:', { fullName, email, password });
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: fullName, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Auth API route was not found. Restart the backend server on the latest code.');
+        }
+        throw new Error(data.message || data.error || 'Unable to create account');
+      }
+
+      localStorage.setItem('trendai_token', data.token);
+      localStorage.setItem('trendai_user', JSON.stringify(data.user));
+      setSuccessMessage('Account created. Redirecting to dashboard...');
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to create account');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -109,6 +148,32 @@ export default function Register() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {errorMessage ? (
+                  <div
+                    className="rounded-2xl px-4 py-3 text-sm"
+                    style={{
+                      backgroundColor: 'rgba(239,68,68,0.12)',
+                      color: '#fca5a5',
+                      boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.18)',
+                    }}
+                  >
+                    {errorMessage}
+                  </div>
+                ) : null}
+
+                {successMessage ? (
+                  <div
+                    className="rounded-2xl px-4 py-3 text-sm"
+                    style={{
+                      backgroundColor: 'rgba(34,197,94,0.12)',
+                      color: '#86efac',
+                      boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.18)',
+                    }}
+                  >
+                    {successMessage}
+                  </div>
+                ) : null}
+
                 <div>
                   <label className="mb-2 block text-sm font-medium text-white/72">Full name</label>
                   <input
@@ -199,10 +264,14 @@ export default function Register() {
 
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-                  style={{ backgroundColor: 'var(--primary)' }}
+                  style={{
+                    backgroundColor: 'var(--primary)',
+                    opacity: isSubmitting ? 0.7 : 1,
+                  }}
                 >
-                  Create account
+                  {isSubmitting ? 'Creating account...' : 'Create account'}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </form>
