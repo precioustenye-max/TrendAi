@@ -1,7 +1,9 @@
 import {
   ArrowRight,
+  BellRing,
   Camera,
   CandlestickChart,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -20,7 +22,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import howStep2 from '../assets/how-step-2.svg';
@@ -28,7 +30,7 @@ import trendAiUserTrade from '../assets/trendai-user-trade.jpg';
 import trendAiUserUpload from '../assets/trendai-user-upload.jpg';
 import { useTheme } from '../context/ThemeContext';
 
-const navItems = ['Home', 'Features', 'How It Works', 'Edge'];
+const navItems = ['Home', 'Features', 'Why TrendAi', 'How To Use', 'How It Works', 'Edge'];
 
 const featureCards = [
   {
@@ -64,6 +66,32 @@ const lowerCards = [
     title: 'Institutional AI',
     text: 'The platform still reasons with structure, support resistance, liquidity, and SMC logic underneath.',
   },
+];
+
+const whyChooseCards = [
+  {
+    icon: ShieldCheck,
+    title: 'Risk-aware analysis',
+    text: 'Every setup is organized around entry, stop loss, target, RR, and invalidation so users know what can go wrong before entering.',
+  },
+  {
+    icon: BellRing,
+    title: 'Entry notifications',
+    text: 'Users can prepare a trade idea and get notified when price reaches the planned entry zone.',
+  },
+  {
+    icon: Zap,
+    title: 'Built for speed',
+    text: 'The app keeps the workflow simple: upload, analyze, review the plan, then wait for the entry alert.',
+  },
+];
+
+const howToUseSteps = [
+  'Choose the market you want to trade.',
+  'Upload the 4H chart and 15M chart screenshots.',
+  'Select scalping or swing as your trade focus.',
+  'Review entry, stop loss, target, strength, and duration.',
+  'Turn on the entry alert and wait for price to reach the level.',
 ];
 
 const workflowSteps = [
@@ -193,13 +221,13 @@ export default function Home() {
           }}
         />
 
-        <motion.div
+        <Motion.div
           animate={{ opacity: 1 }}
           className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1320px] flex-col px-4 pb-14 pt-4 sm:px-6 md:px-8"
           initial={{ opacity: 0 }}
           transition={{ duration: 0.45 }}
         >
-          <motion.header
+          <Motion.header
             animate={{ opacity: 1, y: 0 }}
             className="mb-8 rounded-full px-4 py-3 md:px-6"
             initial={{ opacity: 0, y: -16 }}
@@ -208,7 +236,7 @@ export default function Home() {
             <div className="relative flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-4">
                 <Link to="/" className="inline-flex min-w-0 items-center gap-3">
-                  <motion.div
+                  <Motion.div
                     animate={{ y: [0, -4, 0] }}
                     className="grid h-9 w-9 shrink-0 grid-cols-3 gap-1 rounded-xl p-2"
                     transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -226,7 +254,7 @@ export default function Home() {
                         }}
                       />
                     ))}
-                  </motion.div>
+                  </Motion.div>
                   <span className="truncate text-xl font-semibold tracking-[-0.03em]">TrendAi</span>
                 </Link>
 
@@ -317,7 +345,7 @@ export default function Home() {
                 </div>
               ) : null}
             </div>
-          </motion.header>
+          </Motion.header>
 
           <main className="flex-1">
             <section
@@ -328,7 +356,7 @@ export default function Home() {
                 boxShadow: `inset 0 0 0 1px ${borderGlow}`,
               }}
             >
-              <motion.div
+              <Motion.div
                 animate={{ scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }}
                 className="pointer-events-none absolute inset-x-[14%] bottom-[-10%] h-[320px] rounded-full blur-3xl"
                 transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
@@ -337,20 +365,20 @@ export default function Home() {
                     'radial-gradient(circle, rgba(24,210,107,0.42) 0%, rgba(96,165,250,0.34) 38%, rgba(245,158,11,0.26) 58%, transparent 74%)',
                 }}
               />
-              <motion.div
+              <Motion.div
                 animate={{ x: [0, 20, 0], opacity: [0.5, 0.8, 0.5] }}
                 className="pointer-events-none absolute inset-x-[24%] top-[-18%] h-[240px] rounded-full blur-3xl"
                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                 style={{ background: 'radial-gradient(circle, rgba(96,165,250,0.14), transparent 68%)' }}
               />
 
-              <motion.div
+              <Motion.div
                 className="relative z-10 mx-auto max-w-[860px] text-center"
                 initial="hidden"
                 animate="show"
                 variants={stagger}
               >
-                <motion.div
+                <Motion.div
                   variants={fadeUp}
                   transition={{ duration: 0.45 }}
                   className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
@@ -362,9 +390,9 @@ export default function Home() {
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   AI market intelligence
-                </motion.div>
+                </Motion.div>
 
-                <motion.h1
+                <Motion.h1
                   variants={fadeUp}
                   transition={{ duration: 0.55 }}
                   className="mt-6 text-[2.8rem] font-semibold leading-[0.96] tracking-[-0.06em] sm:text-[4rem] lg:text-[5.1rem]"
@@ -375,18 +403,18 @@ export default function Home() {
                   Trading 
                   <br />
                    starts here.
-                </motion.h1>
+                </Motion.h1>
 
-                <motion.p
+                <Motion.p
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                   className="mx-auto mt-5 max-w-[620px] text-sm leading-7 sm:text-base"
                   style={{ color: subtleText }}
                 >
                   TrendAi helps you move from chart screenshot to a clean trade plan fast. Get the execution first, then scroll for more or open the deeper explanation when you need it.
-                </motion.p>
+                </Motion.p>
 
-                <motion.div
+                <Motion.div
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                   className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
@@ -410,10 +438,10 @@ export default function Home() {
                   >
                     Open Dashboard
                   </Link>
-                </motion.div>
-              </motion.div>
+                </Motion.div>
+              </Motion.div>
 
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -429,7 +457,7 @@ export default function Home() {
                   }}
                 />
 
-                <motion.div
+                <Motion.div
                   whileHover={{ y: -8 }}
                   className="mx-auto w-full max-w-[760px] rounded-[34px] p-4 shadow-[0_30px_120px_rgba(0,0,0,0.45)] sm:p-6"
                   style={{
@@ -479,7 +507,7 @@ export default function Home() {
                     >
                       <div className="absolute left-[9%] right-[8%] top-[28%] border-t border-dashed" style={{ borderColor: isLight ? 'rgba(15,23,42,0.2)' : 'rgba(255,255,255,0.22)' }} />
                       <div className="absolute bottom-[19%] left-[8%] right-[12%] border-t" style={{ borderColor: 'rgba(24,210,107,0.38)' }} />
-                      <motion.div
+                      <Motion.div
                         animate={{ x: [0, 6, 0] }}
                         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                         className="absolute inset-x-[8%] bottom-[15%] top-[18%]"
@@ -493,9 +521,9 @@ export default function Home() {
                             strokeLinecap="round"
                           />
                         </svg>
-                      </motion.div>
+                      </Motion.div>
 
-                      <motion.div
+                      <Motion.div
                         animate={{ opacity: [0.55, 0.85, 0.55] }}
                         transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
                         className="absolute left-[58%] top-[43%] h-[44px] w-[20%] bg-white/18"
@@ -529,7 +557,7 @@ export default function Home() {
                         ['SL', '63,780'],
                         ['TP 1', '64,980'],
                       ].map(([label, value]) => (
-                        <motion.div
+                        <Motion.div
                           key={label}
                           whileHover={{ y: -4 }}
                           className="rounded-2xl px-4 py-3"
@@ -537,15 +565,15 @@ export default function Home() {
                         >
                           <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: fadedText }}>{label}</p>
                           <p className="text-sm font-semibold" style={{ color: strongText }}>{value}</p>
-                        </motion.div>
+                        </Motion.div>
                       ))}
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
+                </Motion.div>
+              </Motion.div>
             </section>
 
-            <motion.section
+            <Motion.section
               id="features"
               className="container mx-auto mt-20 grid gap-4 md:grid-cols-3"
               initial="hidden"
@@ -556,7 +584,7 @@ export default function Home() {
               {featureCards.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <motion.div
+                  <Motion.div
                     key={item.title}
                     variants={fadeUp}
                     whileHover={{ y: -8 }}
@@ -578,12 +606,109 @@ export default function Home() {
                     </div>
                     <h2 className="mt-4 text-lg font-semibold" style={{ color: strongText }}>{item.title}</h2>
                     <p className="mt-3 text-sm leading-6" style={{ color: subtleText }}>{item.text}</p>
-                  </motion.div>
+                  </Motion.div>
                 );
               })}
-            </motion.section>
+            </Motion.section>
 
-            <motion.section
+            <Motion.section
+              id="how-to-use"
+              className="container mx-auto mt-8 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={stagger}
+            >
+              <Motion.div
+                variants={fadeUp}
+                className="rounded-[32px] p-5 sm:p-6 md:p-8"
+                style={{
+                  backgroundColor: cardBackground,
+                  boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                }}
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--chart-blue)' }}>
+                  How to use
+                </p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em]" style={{ color: strongText }}>
+                  From chart to trade plan in five steps.
+                </h2>
+                <div className="mt-6 space-y-3">
+                  {howToUseSteps.map((step, index) => (
+                    <Motion.div
+                      key={step}
+                      variants={fadeUp}
+                      className="flex items-start gap-3 rounded-[22px] p-4"
+                      style={{
+                        backgroundColor: softBackground,
+                        boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                      }}
+                    >
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                        style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
+                      >
+                        {index + 1}
+                      </span>
+                      <p className="text-sm leading-6" style={{ color: subtleText }}>{step}</p>
+                    </Motion.div>
+                  ))}
+                </div>
+              </Motion.div>
+
+              <Motion.div
+                variants={fadeUp}
+                className="rounded-[32px] p-5 sm:p-6 md:p-8"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(24,210,107,0.12), rgba(96,165,250,0.1), rgba(245,158,11,0.08))',
+                  boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--primary)' }}>
+                      Entry alert
+                    </p>
+                    <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em]" style={{ color: strongText }}>
+                      Get notified when price reaches your entry.
+                    </h2>
+                  </div>
+                  <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: 'rgba(24,210,107,0.14)', color: 'var(--primary)' }}
+                  >
+                    <BellRing className="h-6 w-6" />
+                  </div>
+                </div>
+
+                <div className="mt-6 rounded-[26px] p-4" style={{ backgroundColor: softBackground }}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: strongText }}>XAUUSD entry alert</p>
+                      <p className="mt-1 text-xs" style={{ color: dimText }}>Notify at 1202.00</p>
+                    </div>
+                    <span
+                      className="rounded-full px-3 py-1 text-xs font-bold"
+                      style={{ backgroundColor: 'rgba(24,210,107,0.14)', color: 'var(--primary)' }}
+                    >
+                      Armed
+                    </span>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    {['Push notification when entry is touched', 'Trade plan opens from the alert', 'Works with analysis result levels'].map((item) => (
+                      <div key={item} className="flex items-center gap-2 text-sm" style={{ color: subtleText }}>
+                        <CheckCircle2 className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Motion.div>
+            </Motion.section>
+
+            <Motion.section
               id="how-it-works"
               className="relative left-1/2 right-1/2 mt-8 w-screen -translate-x-1/2"
               initial="hidden"
@@ -591,7 +716,7 @@ export default function Home() {
               viewport={{ once: true, amount: 0.2 }}
               variants={stagger}
             >
-              <motion.div
+              <Motion.div
                 variants={fadeUp}
                 className="mx-auto overflow-hidden rounded-[34px] px-4 sm:px-6 md:px-8"
                 style={{
@@ -645,7 +770,7 @@ export default function Home() {
                 </div>
 
                 <div className="relative mt-4 overflow-hidden">
-                  <motion.div
+                  <Motion.div
                     className="flex"
                     animate={{ x: `-${activeWorkflowStep * 100}%` }}
                     transition={{ duration: 0.55, ease: 'easeInOut' }}
@@ -655,7 +780,7 @@ export default function Home() {
 
                       return (
                         <div key={item.step} className="min-w-full">
-                          <div className="grid min-h-[560px] gap-8 px-5 py-7 sm:px-6 md:min-h-[620px] md:px-8 md:py-10 lg:grid-cols-[1fr_0.96fr] lg:items-center xl:px-14">
+                          <div className="grid min-h-[560px] gap-8 px-5 py-7 sm:px-6 md:min-h-[720px] md:px-8 md:py-10 lg:grid-cols-[1fr_0.96fr] lg:items-center xl:px-14">
                             <div className="order-2 flex flex-col justify-center lg:order-1">
                               <div
                                 className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
@@ -728,7 +853,7 @@ export default function Home() {
                         </div>
                       );
                     })}
-                  </motion.div>
+                  </Motion.div>
                 </div>
 
                 <div className="flex items-center justify-center gap-2.5 px-4 pb-6 pt-5 sm:px-6">
@@ -750,10 +875,66 @@ export default function Home() {
                     );
                   })}
                 </div>
-              </motion.div>
-            </motion.section>
+              </Motion.div>
+            </Motion.section>
 
-            <motion.section
+            <Motion.section
+              id="why-trendai"
+              className="container mx-auto mt-8"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={stagger}
+            >
+              <Motion.div
+                variants={fadeUp}
+                className="rounded-[32px] p-5 sm:p-6 md:p-8"
+                style={{
+                  backgroundColor: cardBackground,
+                  boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                }}
+              >
+                <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--primary)' }}>
+                      Why choose TrendAi
+                    </p>
+                    <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em]" style={{ color: strongText }}>
+                      Built for traders who need clear action, not noise.
+                    </h2>
+                    <p className="mt-3 text-sm leading-7" style={{ color: subtleText }}>
+                      TrendAi helps users understand the trade before they risk money: what to
+                      watch, where the entry is, where the setup fails, and when price reaches
+                      the planned level.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {whyChooseCards.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Motion.div
+                          key={item.title}
+                          variants={fadeUp}
+                          whileHover={{ y: -6 }}
+                          className="rounded-[26px] p-5"
+                          style={{
+                            backgroundColor: softBackground,
+                            boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+                          }}
+                        >
+                          <Icon className="h-5 w-5" style={{ color: 'var(--primary)' }} />
+                          <h3 className="mt-4 font-semibold" style={{ color: strongText }}>{item.title}</h3>
+                          <p className="mt-2 text-sm leading-6" style={{ color: subtleText }}>{item.text}</p>
+                        </Motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Motion.div>
+            </Motion.section>
+
+            <Motion.section
               id="edge"
               className="container mx-auto mt-8 grid gap-4 md:grid-cols-3"
               initial="hidden"
@@ -764,7 +945,7 @@ export default function Home() {
               {lowerCards.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <motion.div
+                  <Motion.div
                     key={item.title}
                     variants={fadeUp}
                     whileHover={{ y: -8 }}
@@ -777,12 +958,12 @@ export default function Home() {
                     <Icon className="h-5 w-5" style={{ color: 'var(--primary)' }} />
                     <h2 className="mt-4 text-lg font-semibold" style={{ color: strongText }}>{item.title}</h2>
                     <p className="mt-3 text-sm leading-6" style={{ color: subtleText }}>{item.text}</p>
-                  </motion.div>
+                  </Motion.div>
                 );
               })}
-            </motion.section>
+            </Motion.section>
 
-            <motion.section
+            <Motion.section
               className="container mx-auto mt-8"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -820,7 +1001,7 @@ export default function Home() {
 
                   <div className="space-y-3">
                     {edgePoints.map((point) => (
-                      <motion.div
+                      <Motion.div
                         key={point}
                         whileHover={{ x: 4 }}
                         className="rounded-[22px] px-4 py-4"
@@ -830,15 +1011,15 @@ export default function Home() {
                         }}
                       >
                         <p className="text-sm" style={{ color: isLight ? 'rgba(15,23,42,0.78)' : 'rgba(255,255,255,0.76)' }}>{point}</p>
-                      </motion.div>
+                      </Motion.div>
                     ))}
                   </div>
                 </div>
               </div>
-            </motion.section>
+            </Motion.section>
           </main>
 
-          <motion.footer
+          <Motion.footer
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -944,8 +1125,8 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </motion.footer>
-        </motion.div>
+          </Motion.footer>
+        </Motion.div>
       </div>
     </div>
   );

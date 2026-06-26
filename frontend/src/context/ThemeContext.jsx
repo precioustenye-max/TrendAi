@@ -28,7 +28,6 @@ export function ThemeProvider({ children }) {
     const timeoutId = window.setTimeout(() => {
       document.documentElement.classList.remove('theme-transitioning');
     }, 260);
-
     return () => {
       window.clearTimeout(timeoutId);
       document.documentElement.classList.remove('theme-transitioning');

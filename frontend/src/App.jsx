@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import AiAnalysis from './pages/AiAnalysis';
 import ChatAnalyzer from './pages/ChatAnalyzer';
+import TradeAnalysisResult from './pages/TradeAnalysisResult';
+import FxCalculator from './pages/FxCalculator';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import About from './pages/About';
@@ -22,6 +24,8 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ai-analysis" element={<AiAnalysis />} />
           <Route path="/chat-analyzer" element={<ChatAnalyzer />} />
+          <Route path="/trade-analysis" element={<TradeAnalysisResult />} />
+          <Route path="/fx-calculator" element={<FxCalculator />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/about" element={<About />} />

@@ -35,10 +35,10 @@
 | **UI** | shadcn/ui | latest |
 | **Icons** | Lucide React | latest |
 | **Backend** | Fastify | 5.x |
-| **ORM** | Prisma | 5.x |
-| **Database** | PostgreSQL | - |
-| **Auth** | Clerk | latest |
-| **AI** | Gemini AI | - |
+| **Database driver** | mysql2 | 3.x |
+| **Database** | Standalone MySQL Server | 8.4 |
+| **Auth** | Custom email/password + signed session token | - |
+| **AI** | Planned; not implemented | - |
 
 ---
 
@@ -251,7 +251,11 @@ interface Analysis {
 
 ## 7. Database Schema
 
-### 7.1 Prisma Schema
+The current backend connects directly to a standalone MySQL server through
+`mysql2`. XAMPP is not required. The executable schema is located at
+`backend/database/schema.sql`.
+
+### 7.1 Planned Analysis Schema
 
 ```prisma
 model User {
@@ -282,10 +286,10 @@ model Analysis {
 
 ## 8. Authentication
 
-### 8.1 Clerk Integration
+### 8.1 Current Authentication
 
-**Frontend:** `@clerk/react-router` for sign-in/sign-up
-**Backend:** `@clerk/fastify` for route protection
+**Frontend:** Custom React login and registration forms
+**Backend:** MySQL user records, scrypt password hashing, and signed session tokens
 
 **Protected Routes:**
 - `/api/analyze`
@@ -332,9 +336,9 @@ model Analysis {
 |--------|----------|-------|
 | Frontend | Vercel | Zero-config, auto TLS |
 | Backend | Railway/Render | Node.js runtime |
-| Database | Neon | Serverless PostgreSQL |
-| Auth | Clerk | Managed auth |
-| AI | Google AI | Gemini API |
+| Database | Standalone MySQL Server | Runs locally during development |
+| Auth | Fastify backend | Custom authentication |
+| AI | To be selected | Not implemented yet |
 
 ---
 
@@ -365,11 +369,8 @@ npm install
 # Start development server
 npm run dev
 
-# Generate Prisma client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev
+# Create the local MySQL database and users table
+sudo mysql < database/schema.sql
 
 # Start production server
 npm run start

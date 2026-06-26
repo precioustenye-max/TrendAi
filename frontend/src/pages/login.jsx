@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, Eye, EyeOff, Globe, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BarChart3, Eye, EyeOff, Globe, Home, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -67,6 +67,20 @@ export default function LogIn() {
         color: 'var(--foreground)',
       }}
     >
+      <Link
+        to="/"
+        className="absolute left-5 top-5 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border text-white transition hover:scale-[1.03] sm:left-7 sm:top-7"
+        style={{
+          borderColor: 'rgba(255,255,255,0.08)',
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+        }}
+        aria-label="Go to home page"
+        title="Home"
+      >
+        <Home className="h-5 w-5" />
+      </Link>
+
       <div
         className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl overflow-hidden rounded-[36px] border lg:grid-cols-[1.05fr_0.95fr]"
         style={{

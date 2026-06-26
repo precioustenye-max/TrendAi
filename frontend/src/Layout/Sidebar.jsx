@@ -3,6 +3,7 @@ import {
   BarChart3,
   Sparkles,
   CandlestickChart,
+  Calculator,
   History,
   Settings,
   X,
@@ -16,6 +17,7 @@ export default function Sidebar() {
     { label: 'Dashboard', path: '/dashboard', icon: BarChart3 },
     { label: 'Ai Analysis', path: '/ai-analysis', icon: Sparkles },
     { label: 'Screenshot AI', path: '/chat-analyzer', icon: CandlestickChart },
+    { label: 'FX Calculator', path: '/fx-calculator', icon: Calculator },
     { label: 'History', path: '/history', icon: History },
     { label: 'Settings', path: '/settings', icon: Settings },
   ];
@@ -45,7 +47,7 @@ export default function Sidebar() {
           color: 'var(--sidebar-foreground)',
         }}
       >
-        <div className="border-b px-4 py-4" style={{ borderColor: 'var(--sidebar-border)' }}>
+        <div className=" px-4 py-4" style={{ borderColor: 'var(--sidebar-border)' }}>
           <div
             className={`flex items-center transition-all duration-300 ${
               isOpen ? 'justify-between gap-3' : 'justify-center'

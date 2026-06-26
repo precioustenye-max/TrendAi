@@ -6,6 +6,8 @@ import SearchModal from './SearchModal';
 import { SearchProvider } from '../context/SearchContext';
 import { SidebarProvider, useSidebar } from '../context/SidebarContext';
 
+const MotionDiv = motion.div;
+
 function LayoutContent() {
   const { isDesktopOpen, isMobile } = useSidebar();
   const location = useLocation();
@@ -24,13 +26,13 @@ function LayoutContent() {
       )}
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out">
-        <div className="mx-auto w-full max-w-[1420px]">
+        <div className="mx-auto w-full max-w-full">
           <Navbar />
         </div>
         <main className="flex-1">
-          <div className="mx-auto w-full max-w-[840px] px-4 py-5 sm:px-5 md:px-7 md:py-6">
+          <div className="mx-auto w-full max-w-[1280px] px-4 py-5 sm:px-5 md:px-7 md:py-6">
             <AnimatePresence mode="wait">
-              <motion.div
+              <MotionDiv
                 key={location.pathname}
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -38,7 +40,7 @@ function LayoutContent() {
                 transition={{ duration: 0.28 }}
               >
                 <Outlet />
-              </motion.div>
+              </MotionDiv>
             </AnimatePresence>
           </div>
         </main>
