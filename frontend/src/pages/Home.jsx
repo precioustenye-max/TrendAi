@@ -1019,6 +1019,80 @@ export default function Home() {
             </Motion.section>
           </main>
 
+
+          <section className='container mx-auto mt-10'>
+
+            <div
+              className='md:grid-cols-2 grid rounded-2xl  md:gap-10 gap-8'
+              style={{
+                backgroundColor: cardBackground,
+                boxShadow: `inset 0 0 0 1px ${borderGlow}`,
+              }}>
+
+            <form 
+            // onSubmit={}
+            className='w-full mx-w-lg  p-6 rounded-2xl  space-y-4' >
+               <h2 className='text-2xl text-gray-800 text-center capitalize'>contact us</h2>
+
+               <input type="text"
+               className='w-full border border-gray-300 border rounded-lg p-3 focus:outline-none'
+               name='name'
+               placeholder='enter your name'
+                />
+
+              <input type="text"
+               className='w-full border border-gray-300 border rounded-lg p-3 focus:outline-none'
+               name='name'
+               placeholder='enter your name'
+                />
+
+              <textarea
+               type="text"
+               className='w-full border border-gray-300 border rounded-lg p-3 focus:outline-none'
+               name='message'
+               placeholder='enter your name'
+                />
+
+                <button
+                className='w-full rounded-2xl p-2 capitalize font-semibold text-black'
+                style={{backgroundColor : 'var(--primary)'}}>
+                  submit
+                </button>
+ 
+            </form>
+
+            <div className='justify-center p-6 flex-col'>
+               <h2 className='text-4xl capitalize font-semibold pb-3'>our social medias</h2>
+                 <p className="mt-4 max-w-sm text-sm leading-7" style={{ color: dimText }}>
+                  Follow us for daily trade setups, market breakdowns, and platforms updates</p>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                  {socialLinks.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:scale-[1.03]"
+                        style={{
+                          backgroundColor: ghostButtonBackground,
+                          boxShadow: `inset 0 0 0 1px ${ghostButtonBorder}`,
+                          color: strongText,
+                        }}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {item.label}
+                      </a>
+                    );
+                  })}
+                </div>
+            </div>
+            </div>
+          </section>
+
+
           <Motion.footer
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

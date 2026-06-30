@@ -39,6 +39,7 @@ loadEnvFile()
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: Number.parseInt(process.env.PORT || "4000", 10),
+  host: process.env.HOST || "127.0.0.1",
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   jwtSecret: process.env.JWT_SECRET || "",
   dbHost: process.env.DB_HOST || "127.0.0.1",
@@ -46,4 +47,15 @@ export const env = {
   dbUser: process.env.DB_USER || "root",
   dbPassword: process.env.DB_PASSWORD || "",
   dbName: process.env.DB_NAME || "trendai",
+  geminiApiKey: process.env.GEMINI_API_KEY || "",
+  aiProvider: process.env.AI_PROVIDER || "gemini",
+  enableAlertPolling: process.env.ENABLE_ALERT_POLLING === "true",
+  alertPollIntervalMs: Number.parseInt(process.env.ALERT_POLL_INTERVAL_MS || "60000", 10),
+  smtpHost: process.env.SMTP_HOST || "",
+  smtpPort: Number.parseInt(process.env.SMTP_PORT || "587", 10),
+  smtpSecure: process.env.SMTP_SECURE === "true",
+  smtpUser: process.env.SMTP_USER || "",
+  smtpPassword: process.env.SMTP_PASSWORD || "",
+  emailFrom: process.env.EMAIL_FROM || process.env.SMTP_USER || "",
+  enableEmailAlerts: process.env.ENABLE_EMAIL_ALERTS === "true",
 }

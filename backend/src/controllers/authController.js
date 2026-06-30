@@ -25,6 +25,6 @@ export async function login(request, reply) {
 }
 
 export async function getCurrentUser(request, reply) {
-  const user = await getUserFromToken(request.token)
+  const user = request.user || (await getUserFromToken(request.token))
   return reply.send(successResponse({ user }, "User profile fetched successfully"))
 }

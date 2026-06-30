@@ -8,30 +8,115 @@ import {
   ScanSearch,
 } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearch } from '../context/SearchContext';
+import { getDashboardStats, getLearningPerformance } from '../lib/api';
 
 export default function Dashboard() {
   const [selectedAsset, setSelectedAsset] = useState('BTC/USDT');
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [learningPerformance, setLearningPerformance] = useState(null);
+  const [statsError, setStatsError] = useState('');
   const { openSearch } = useSearch();
 
-  const stats = [
-    { label: 'TOTAL ANALYSES', value: '5', icon: Activity, iconColor: 'var(--chart-green)' },
-    { label: 'BULLISH CALLS', value: '2', icon: ArrowUpRight, iconColor: 'var(--chart-green)' },
-    { label: 'BEARISH CALLS', value: '3', icon: ArrowDownRight, iconColor: 'var(--chart-red)' },
-    { label: 'AVG CONFIDENCE', value: '80%', icon: TrendingUp, iconColor: 'var(--chart-purple)' },
-  ];
+  useEffect(() => {
+    let ignore = false;
 
-  const assets = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'EUR/USD', 'AAPL', 'TSLA'];
+    getDashboardStats()
+      .then((data) => {
+        if (!ignore) {
+          setDashboardStats(data);
+          setStatsError('');
+        }
+      })
+      .catch((error) => {
+        if (!ignore) {
+          setStatsError(error instanceof Error ? error.message : 'Unable to load dashboard stats');
+        }
+      });
 
-  const recentActivity = [
-    { asset: 'BTC/USDT', time: '4/23/2026, 2:50:54 AM', signal: 'BEARISH', percentage: '80%', color: 'red' },
-    { asset: 'EUR/USD', time: '4/22/2026, 6:15:11 PM', signal: 'BULLISH', percentage: '90%', color: 'green' },
-    { asset: 'BTC/USDT', time: '4/22/2026, 6:14:20 PM', signal: 'BEARISH', percentage: '86%', color: 'red' },
-    { asset: 'BTC/USDT', time: '4/22/2026, 6:14:11 PM', signal: 'BULLISH', percentage: '73%', color: 'green' },
-    { asset: 'BTC/USDT', time: '4/19/2026, 4:59:02 PM', signal: 'BEARISH', percentage: '72%', color: 'red' },
-  ];
+    getLearningPerformance()
+      .then((data) => {
+        if (!ignore) {
+          setLearningPerformance(data);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setLearningPerformance(null);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const stats = useMemo(() => {
+    return [
+      { label: 'TOTAL ANALYSES', value: String(dashboardStats?.totalAnalyses || 0), icon: Activity, iconColor: 'var(--chart-green)' },
+      { label: 'BULLISH CALLS', value: String(dashboardStats?.bullishCount || 0), icon: ArrowUpRight, iconColor: 'var(--chart-green)' },
+      { label: 'BEARISH CALLS', value: String(dashboardStats?.bearishCount || 0), icon: ArrowDownRight, iconColor: 'var(--chart-red)' },
+      { label: 'WIN RATE', value: dashboardStats?.winRate == null ? 'N/A' : `${Math.round(dashboardStats.winRate)}%`, icon: TrendingUp, iconColor: 'var(--chart-purple)' },
+    ];
+  }, [dashboardStats]);
+
+  const learningStats = useMemo(() => {
+    const recentAnalyses = dashboardStats?.recentAnalyses || [];
+    const tagStats = new Map();
+    const pairStats = new Map();
+    const timeframeStats = new Map();
+
+    recentAnalyses.forEach((analysis) => {
+      const result = analysis.tradeResult?.result;
+
+      if (!result) {
+        return;
+      }
+
+      const addStat = (map, key) => {
+        if (!key) {
+          return;
+        }
+
+        const current = map.get(key) || { wins: 0, total: 0 };
+        current.total += 1;
+        current.wins += result === 'win' ? 1 : 0;
+        map.set(key, current);
+      };
+
+      (analysis.strategyTags || []).forEach((tag) => addStat(tagStats, tag));
+      addStat(pairStats, analysis.asset);
+      addStat(timeframeStats, analysis.timeframe);
+    });
+
+    const ranked = (map) =>
+      [...map.entries()]
+        .map(([label, value]) => ({
+          label,
+          total: value.total,
+          winRate: value.total ? Math.round((value.wins / value.total) * 100) : 0,
+        }))
+        .sort((a, b) => b.winRate - a.winRate || b.total - a.total);
+
+    const tags = ranked(tagStats);
+
+    return {
+      bestTags: tags.filter((item) => item.winRate >= 50).slice(0, 3),
+      weakTags: tags.filter((item) => item.winRate < 50).reverse().slice(0, 3),
+      pairPerformance: ranked(pairStats).slice(0, 3),
+      timeframePerformance: ranked(timeframeStats).slice(0, 3),
+    };
+  }, [dashboardStats]);
+
+  const recentActivity = (dashboardStats?.recentAnalyses || []).map((analysis) => ({
+    asset: analysis.asset || 'Unknown',
+    time: analysis.createdAt ? new Date(analysis.createdAt).toLocaleString() : '',
+    signal: analysis.bias?.toUpperCase() || 'NEUTRAL',
+    percentage: `${Math.round(analysis.confidence || 0)}%`,
+    color: analysis.bias === 'Bullish' ? 'green' : 'red',
+  }));
 
   return (
     <Motion.div
@@ -44,6 +129,7 @@ export default function Dashboard() {
       <Motion.div className="mb-7" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.05 }}>
         <h1 className="mb-1 text-2xl font-semibold tracking-[-0.03em]" style={{ color: 'var(--foreground)' }}>Dashboard</h1>
         <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Quick overview of your AI-powered trading activity.</p>
+        {statsError && <p className="mt-2 text-sm text-red-400">{statsError}</p>}
       </Motion.div>
 
       <Motion.div
@@ -65,7 +151,7 @@ export default function Dashboard() {
               Main workflow
             </div>
             <h2 className="mt-4 max-w-[580px] text-2xl font-semibold tracking-[-0.04em] sm:text-[2rem]" style={{ color: 'var(--foreground)' }}>
-              Upload a chart screenshot first and let the AI read the image before anything else.
+              Upload a chart screenshot let the AI read the image before anything else.
             </h2>
             <p className="mt-3 max-w-[560px] text-sm leading-6" style={{ color: 'var(--muted-foreground)' }}>
               Screenshot-based analysis is one of the app&apos;s core flows. The user should be able to jump straight into image upload, get OCR and structure detection, and receive bias, trigger, and invalidation from the chart itself.
@@ -80,6 +166,15 @@ export default function Dashboard() {
                 <ImagePlus className="h-4 w-4" />
                 Upload chart screenshot
               </Link>
+                 <Link
+                to="/chat-analyzer"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition"
+                style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
+              >
+                {/* <ImagePlus className="h-4 w-4" /> */}
+                Risk management
+              </Link>
+
               <button
                 type="button"
                 onClick={openSearch}
@@ -88,6 +183,7 @@ export default function Dashboard() {
               >
                 Search asset instead
               </button>
+              
             </div>
           </div>
 
@@ -152,42 +248,42 @@ export default function Dashboard() {
       </Motion.div>
 
       <Motion.div
-        className="mb-6 rounded-2xl border p-5"
-        initial={{ opacity: 0, y: 22 }}
+        className="mb-6 grid gap-4 lg:grid-cols-4"
+        initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.16 }}
-        style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
+        transition={{ duration: 0.35, delay: 0.16 }}
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>Secondary flow</h2>
-            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Search a market directly if you are not starting from a screenshot.</p>
-          </div>
-          <button
-            className="text-sm font-semibold transition"
-            style={{ color: 'var(--chart-green)' }}
-            onClick={openSearch}
+        {[
+          {
+            title: 'Best tags',
+            value: learningPerformance?.bestTags?.length ? learningPerformance.bestTags.join(', ') : learningStats.bestTags.length ? learningStats.bestTags.map((item) => item.label).join(', ') : 'Not enough outcomes',
+          },
+          {
+            title: 'Weak tags',
+            value: learningPerformance?.weakTags?.length ? learningPerformance.weakTags.join(', ') : learningStats.weakTags.length ? learningStats.weakTags.map((item) => item.label).join(', ') : 'Not enough outcomes',
+          },
+          {
+            title: 'Pair performance',
+            value: learningStats.pairPerformance.length
+              ? learningStats.pairPerformance.map((item) => `${item.label} ${item.winRate}%`).join(', ')
+              : 'Not enough outcomes',
+          },
+          {
+            title: 'Timeframe performance',
+            value: learningStats.timeframePerformance.length
+              ? learningStats.timeframePerformance.map((item) => `${item.label} ${item.winRate}%`).join(', ')
+              : 'Not enough outcomes',
+          },
+        ].map((item) => (
+          <div
+            key={item.title}
+            className="rounded-2xl border p-4"
+            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
           >
-            Search any asset -&gt;
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2.5">
-          {assets.map((asset) => (
-            <Motion.button
-              key={asset}
-              onClick={() => setSelectedAsset(asset)}
-              className="rounded-xl px-4 py-2 font-mono text-sm font-semibold transition"
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                backgroundColor: selectedAsset === asset ? 'var(--primary)' : 'var(--secondary)',
-                color: selectedAsset === asset ? 'var(--primary-foreground)' : 'var(--foreground)',
-              }}
-            >
-              {asset}
-            </Motion.button>
-          ))}
-        </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>{item.title}</p>
+            <p className="mt-3 text-sm font-semibold leading-6" style={{ color: 'var(--foreground)' }}>{item.value}</p>
+          </div>
+        ))}
       </Motion.div>
 
       <Motion.div
@@ -203,6 +299,12 @@ export default function Dashboard() {
         </div>
 
         <div>
+          {recentActivity.length === 0 && (
+            <div className="px-5 py-8 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+              No recent analyses yet.
+            </div>
+          )}
+
           {recentActivity.map((activity, index) => (
             <Motion.div
               key={`${activity.asset}-${index}`}

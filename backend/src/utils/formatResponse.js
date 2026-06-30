@@ -10,6 +10,7 @@ export function errorResponse(message = "Request failed", details = null) {
   return {
     success: false,
     message,
-    details,
+    error: typeof details === "string" ? details : details?.reason || null,
+    details: typeof details === "string" ? null : details,
   }
 }

@@ -15,7 +15,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { label: 'Dashboard', path: '/dashboard', icon: BarChart3 },
-    { label: 'Ai Analysis', path: '/ai-analysis', icon: Sparkles },
+    // { label: 'Ai Analysis', path: '/ai-analysis', icon: Sparkles },
     { label: 'Screenshot AI', path: '/chat-analyzer', icon: CandlestickChart },
     { label: 'FX Calculator', path: '/fx-calculator', icon: Calculator },
     { label: 'History', path: '/history', icon: History },
@@ -127,7 +127,7 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="border-t px-4 py-5" style={{ borderColor: 'var(--sidebar-border)' }}>
+        {/* <div className="border-t px-4 py-5" style={{ borderColor: 'var(--sidebar-border)' }}>
           <p
             className={`overflow-hidden text-xs leading-5 transition-all duration-200 ${
               isOpen ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'
@@ -136,7 +136,7 @@ export default function Sidebar() {
           >
             AI insights are educational. Not financial advice.
           </p>
-        </div>
+        </div> */}
       </aside>
     </>
   );

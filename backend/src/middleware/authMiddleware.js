@@ -1,4 +1,5 @@
 import { errorResponse } from "../utils/formatResponse.js"
+import { getUserFromToken } from "../services/authService.js"
 
 export async function authMiddleware(request, reply) {
   const authorizationHeader = request.headers.authorization
@@ -8,4 +9,10 @@ export async function authMiddleware(request, reply) {
   }
 
   request.token = authorizationHeader.slice(7).trim()
+
+  try {
+    request.user = await getUserFromToken(request.token)
+  } catch (error) {
+    return reply.code(error.statusCode || 401).send(errorResponse(error.message || "Invalid token"))
+  }
 }

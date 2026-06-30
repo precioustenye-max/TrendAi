@@ -7,43 +7,139 @@ import {
   BarChart3,
   ArrowUpRight,
   ArrowDownRight,
+  Eye,
+  Trash2,
+  X,
 } from 'lucide-react';
-import { useState } from 'react';
-
-const historyData = [
-  { id: 1, asset: 'BTC/USDT', signal: 'BULLISH', confidence: 85, entry: 45200, exit: 46800, profitLoss: 1600, profitLossPercent: 3.54, date: '2026-04-25', time: '14:32:00' },
-  { id: 2, asset: 'ETH/USDT', signal: 'BEARISH', confidence: 72, entry: 2480, exit: 2420, profitLoss: -60, profitLossPercent: -2.42, date: '2026-04-25', time: '13:15:22' },
-  { id: 3, asset: 'SOL/USDT', signal: 'BULLISH', confidence: 78, entry: 142.5, exit: 148.3, profitLoss: 5.8, profitLossPercent: 4.07, date: '2026-04-24', time: '22:45:00' },
-  { id: 4, asset: 'EUR/USD', signal: 'BULLISH', confidence: 65, entry: 1.085, exit: 1.092, profitLoss: 0.007, profitLossPercent: 0.64, date: '2026-04-24', time: '18:30:15' },
-  { id: 5, asset: 'AAPL', signal: 'BEARISH', confidence: 81, entry: 175.4, exit: 171.2, profitLoss: -4.2, profitLossPercent: -2.39, date: '2026-04-23', time: '15:20:00' },
-];
+import { useEffect, useMemo, useState } from 'react';
+import AnalysisDetail from '../components/analysis/AnalysisDetail';
+import TradeAlertPanel from '../components/analysis/TradeAlertPanel';
+import TradeOutcomeForm from '../components/analysis/TradeOutcomeForm';
+import { deleteAnalysis, getAnalysisById, getHistory } from '../lib/api';
 
 const filters = [
   { key: 'all', label: 'All Signals', icon: Filter },
   { key: 'bullish', label: 'Bullish', icon: TrendingUp },
   { key: 'bearish', label: 'Bearish', icon: TrendingDown },
+  { key: 'neutral', label: 'Neutral', icon: BarChart3 },
 ];
 
 const formatValue = (value) => {
-  if (Math.abs(value) >= 1000) {
-    return value.toLocaleString();
+  if (value === null || value === undefined || value === '') {
+    return '-';
+  }
+
+  const numericValue = Number(value);
+
+  if (!Number.isNaN(numericValue) && Math.abs(numericValue) >= 1000) {
+    return numericValue.toLocaleString();
   }
 
   return value;
 };
 
+const formatDateParts = (value) => {
+  const date = value ? new Date(value) : new Date();
+
+  return {
+    date: date.toLocaleDateString(),
+    time: date.toLocaleTimeString(),
+  };
+};
+
 export default function History() {
   const [filterType, setFilterType] = useState('all');
+  const [historyData, setHistoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState('');
+  const [message, setMessage] = useState('');
 
-  const filteredData =
-    filterType === 'all'
-      ? historyData
-      : historyData.filter((item) => item.signal.toLowerCase() === filterType);
+  const loadHistory = () => {
+    let ignore = false;
 
-  const bullishCount = historyData.filter((item) => item.signal === 'BULLISH').length;
-  const bearishCount = historyData.filter((item) => item.signal === 'BEARISH').length;
-  const winRate = Math.round((historyData.filter((item) => item.profitLoss > 0).length / historyData.length) * 100);
-  const totalProfitLoss = historyData.reduce((sum, item) => sum + item.profitLoss, 0);
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    getHistory({
+      page: 1,
+      limit: 50,
+      bias: filterType === 'all' ? undefined : filterType,
+    })
+      .then((result) => {
+        if (!ignore) {
+          setHistoryData(Array.isArray(result?.analyses) ? result.analyses : []);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err instanceof Error ? err.message : 'Unable to load history');
+          setHistoryData([]);
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  };
+
+  useEffect(() => {
+    return loadHistory();
+  }, [filterType]);
+
+  const summary = useMemo(() => {
+    const bullishCount = historyData.filter((item) => item.bias === 'Bullish').length;
+    const bearishCount = historyData.filter((item) => item.bias === 'Bearish').length;
+    const completedResults = historyData.filter((item) => item.tradeResult?.result);
+    const wins = completedResults.filter((item) => item.tradeResult.result === 'win').length;
+    const winRate = completedResults.length ? Math.round((wins / completedResults.length) * 100) : null;
+    const totalProfitLoss = historyData.reduce(
+      (sum, item) => sum + Number(item.tradeResult?.profitLoss || 0),
+      0
+    );
+
+    const tagStats = new Map();
+
+    historyData.forEach((item) => {
+      const result = item.tradeResult?.result;
+
+      if (!result || !Array.isArray(item.strategyTags)) {
+        return;
+      }
+
+      item.strategyTags.forEach((tag) => {
+        const current = tagStats.get(tag) || { wins: 0, total: 0 };
+        current.total += 1;
+        current.wins += result === 'win' ? 1 : 0;
+        tagStats.set(tag, current);
+      });
+    });
+
+    const rankedTags = [...tagStats.entries()]
+      .filter(([, value]) => value.total > 0)
+      .map(([tag, value]) => ({ tag, winRate: value.wins / value.total, total: value.total }));
+
+    const bestTags = rankedTags
+      .filter((item) => item.winRate >= 0.5)
+      .sort((a, b) => b.winRate - a.winRate)
+      .slice(0, 3)
+      .map((item) => item.tag);
+    const weakTags = rankedTags
+      .filter((item) => item.winRate < 0.5)
+      .sort((a, b) => a.winRate - b.winRate)
+      .slice(0, 3)
+      .map((item) => item.tag);
+
+    return { bullishCount, bearishCount, winRate, totalProfitLoss, bestTags, weakTags };
+  }, [historyData]);
 
   const cardStyle = {
     backgroundColor: 'var(--card)',
@@ -51,6 +147,57 @@ export default function History() {
   };
 
   const mutedText = { color: 'var(--muted-foreground)' };
+
+  const openDetail = async (analysis) => {
+    setSelectedAnalysis(analysis);
+    setDetailLoading(true);
+    setDetailError('');
+    setMessage('');
+
+    try {
+      const detail = await getAnalysisById(analysis.id);
+      setSelectedAnalysis(detail);
+    } catch (err) {
+      setDetailError(err instanceof Error ? err.message : 'Unable to load analysis detail');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetail = () => {
+    setSelectedAnalysis(null);
+    setDetailError('');
+    setMessage('');
+  };
+
+  const handleDelete = async (analysis) => {
+    const confirmed = window.confirm(`Delete analysis for ${analysis.asset || 'Unknown'}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteAnalysis(analysis.id);
+      setHistoryData((current) => current.filter((item) => item.id !== analysis.id));
+      if (selectedAnalysis?.id === analysis.id) {
+        setSelectedAnalysis(null);
+      }
+      setMessage('Analysis deleted.');
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Unable to delete analysis');
+    }
+  };
+
+  const handleOutcomeSaved = (tradeResult) => {
+    setSelectedAnalysis((current) => (current ? { ...current, tradeResult } : current));
+    setHistoryData((current) =>
+      current.map((item) =>
+        item.id === selectedAnalysis?.id ? { ...item, tradeResult } : item,
+      ),
+    );
+    setMessage('Outcome saved. TrendAi will use this feedback to adjust future analysis.');
+  };
 
   return (
     <div
@@ -74,7 +221,7 @@ export default function History() {
             <div>
               <h1 className="text-2xl font-bold tracking-[-0.03em] sm:text-3xl">Analysis History</h1>
               <p className="mt-2 max-w-2xl text-sm sm:text-base" style={mutedText}>
-                Review previous AI trade analysis, filter by signal direction, and monitor historical performance from one place.
+                Review previous AI trade analyses, filter by signal direction, and monitor historical performance from one place.
               </p>
             </div>
           </div>
@@ -92,14 +239,14 @@ export default function History() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: 'Total Analyses', value: historyData.length, icon: BarChart3, tone: 'var(--primary)' },
-          { label: 'Bullish Signals', value: bullishCount, icon: TrendingUp, tone: 'var(--chart-green)' },
-          { label: 'Bearish Signals', value: bearishCount, icon: TrendingDown, tone: 'var(--chart-red)' },
+          { label: 'Bullish Signals', value: summary.bullishCount, icon: TrendingUp, tone: 'var(--chart-green)' },
+          { label: 'Bearish Signals', value: summary.bearishCount, icon: TrendingDown, tone: 'var(--chart-red)' },
           {
             label: 'Net P/L',
-            value: `${totalProfitLoss >= 0 ? '+' : ''}${formatValue(totalProfitLoss)}`,
-            icon: totalProfitLoss >= 0 ? ArrowUpRight : ArrowDownRight,
-            tone: totalProfitLoss >= 0 ? 'var(--chart-green)' : 'var(--chart-red)',
-            meta: `${winRate}% win rate`,
+            value: `${summary.totalProfitLoss >= 0 ? '+' : ''}${formatValue(summary.totalProfitLoss)}`,
+            icon: summary.totalProfitLoss >= 0 ? ArrowUpRight : ArrowDownRight,
+            tone: summary.totalProfitLoss >= 0 ? 'var(--chart-green)' : 'var(--chart-red)',
+            meta: summary.winRate === null ? 'No marked outcomes yet' : `${summary.winRate}% win rate`,
           },
         ].map((item) => {
           const Icon = item.icon;
@@ -117,6 +264,21 @@ export default function History() {
             </div>
           );
         })}
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-3xl border p-5" style={cardStyle}>
+          <p className="text-sm font-medium" style={mutedText}>Overall Win Rate</p>
+          <p className="mt-3 text-2xl font-bold">{summary.winRate === null ? 'Not enough data' : `${summary.winRate}%`}</p>
+        </div>
+        <div className="rounded-3xl border p-5" style={cardStyle}>
+          <p className="text-sm font-medium" style={mutedText}>Best Strategy Tags</p>
+          <p className="mt-3 text-sm font-semibold">{summary.bestTags.length ? summary.bestTags.join(', ') : 'Not enough outcomes yet'}</p>
+        </div>
+        <div className="rounded-3xl border p-5" style={cardStyle}>
+          <p className="text-sm font-medium" style={mutedText}>Weak Strategy Tags</p>
+          <p className="mt-3 text-sm font-semibold">{summary.weakTags.length ? summary.weakTags.join(', ') : 'Not enough outcomes yet'}</p>
+        </div>
       </section>
 
       <section className="rounded-3xl border p-4 sm:p-5" style={cardStyle}>
@@ -154,112 +316,224 @@ export default function History() {
       <section className="rounded-3xl border" style={cardStyle}>
         <div className="border-b px-5 py-4" style={{ borderBottomColor: 'var(--border)' }}>
           <h2 className="text-lg font-semibold">Signal Log</h2>
-          <p className="mt-1 text-sm" style={mutedText}>{filteredData.length} records shown</p>
+          <p className="mt-1 text-sm" style={mutedText}>
+            {loading ? 'Loading records...' : `${historyData.length} records shown`}
+          </p>
+          {message && <p className="mt-2 text-sm" style={{ color: message.includes('Unable') ? 'var(--chart-red)' : 'var(--chart-green)' }}>{message}</p>}
         </div>
 
-        <div className="hidden overflow-x-auto lg:block">
-          <table className="w-full min-w-[900px]">
-            <thead className="border-b" style={{ borderBottomColor: 'var(--border)' }}>
-              <tr>
-                {['Asset', 'Signal', 'Confidence', 'Entry', 'Exit', 'P/L', 'Date'].map((heading) => (
-                  <th
-                    key={heading}
-                    className={`px-6 py-4 text-sm font-semibold ${['Entry', 'Exit', 'P/L'].includes(heading) ? 'text-right' : 'text-left'}`}
-                    style={mutedText}
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item) => (
-                <tr key={item.id} className="border-b last:border-b-0" style={{ borderBottomColor: 'var(--border)' }}>
-                  <td className="px-6 py-5 font-mono font-semibold">{item.asset}</td>
-                  <td className="px-6 py-5">
-                    <div
-                      className="flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.08em]"
-                      style={{
-                        backgroundColor: item.signal === 'BULLISH' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
-                        color: item.signal === 'BULLISH' ? 'var(--chart-green)' : 'var(--chart-red)',
-                      }}
-                    >
-                      {item.signal === 'BULLISH' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                      {item.signal}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 w-20 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--secondary)' }}>
-                        <div className="h-full rounded-full" style={{ backgroundColor: 'var(--chart-green)', width: `${item.confidence}%` }} />
+        {error && <div className="px-5 py-6 text-sm text-red-400">{error}</div>}
+        {!loading && !error && historyData.length === 0 && (
+          <div className="px-5 py-10 text-sm" style={mutedText}>
+            No analyses yet. Upload a chart screenshot to start building history.
+          </div>
+        )}
+
+        {!error && historyData.length > 0 && (
+          <>
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full min-w-[900px]">
+                <thead className="border-b" style={{ borderBottomColor: 'var(--border)' }}>
+                  <tr>
+                    {['Asset', 'Signal', 'Confidence', 'Entry', 'Stop Loss', 'TP', 'Date', 'Actions'].map((heading) => (
+                      <th
+                        key={heading}
+                        className={`px-6 py-4 text-sm font-semibold ${['Entry', 'Stop Loss', 'TP'].includes(heading) ? 'text-right' : 'text-left'}`}
+                        style={mutedText}
+                      >
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyData.map((item) => {
+                    const dateParts = formatDateParts(item.createdAt);
+                    const isBullish = item.bias === 'Bullish';
+
+                    return (
+                      <tr key={item.id} className="border-b last:border-b-0" style={{ borderBottomColor: 'var(--border)' }}>
+                        <td className="px-6 py-5 font-mono font-semibold">{item.asset || 'Unknown'}</td>
+                        <td className="px-6 py-5">
+                          <div
+                            className="flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.08em]"
+                            style={{
+                              backgroundColor: isBullish ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+                              color: isBullish ? 'var(--chart-green)' : 'var(--chart-red)',
+                            }}
+                          >
+                            {isBullish ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                            {item.bias?.toUpperCase() || 'NEUTRAL'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="h-2 w-20 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--secondary)' }}>
+                              <div className="h-full rounded-full" style={{ backgroundColor: 'var(--chart-green)', width: `${item.confidence || 0}%` }} />
+                            </div>
+                            <span className="font-semibold">{Math.round(item.confidence || 0)}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-right font-mono">{formatValue(item.entry)}</td>
+                        <td className="px-6 py-5 text-right font-mono">{formatValue(item.stopLoss)}</td>
+                        <td className="px-6 py-5 text-right font-mono">{formatValue(item.takeProfits?.[0])}</td>
+                        <td className="px-6 py-5" style={mutedText}>
+                          <div>{dateParts.date}</div>
+                          <div className="text-xs">{dateParts.time}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => openDetail(item)}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
+                              style={{ backgroundColor: 'var(--secondary)', color: 'var(--foreground)' }}
+                              aria-label="View analysis"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item)}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
+                              style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: 'var(--chart-red)' }}
+                              aria-label="Delete analysis"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid gap-4 p-4 lg:hidden">
+              {historyData.map((item) => {
+                const dateParts = formatDateParts(item.createdAt);
+                const isBullish = item.bias === 'Bullish';
+
+                return (
+                  <article key={item.id} className="rounded-2xl border p-4" style={{ ...cardStyle, backgroundColor: 'var(--background)' }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-base font-semibold">{item.asset || 'Unknown'}</p>
+                        <p className="mt-1 text-sm" style={mutedText}>{dateParts.date} at {dateParts.time}</p>
                       </div>
-                      <span className="font-semibold">{item.confidence}%</span>
+                      <div
+                        className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold"
+                        style={{
+                          backgroundColor: isBullish ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+                          color: isBullish ? 'var(--chart-green)' : 'var(--chart-red)',
+                        }}
+                      >
+                        {isBullish ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                        {item.bias || 'Neutral'}
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-5 text-right font-mono">{formatValue(item.entry)}</td>
-                  <td className="px-6 py-5 text-right font-mono">{formatValue(item.exit)}</td>
-                  <td
-                    className="px-6 py-5 text-right font-mono font-bold"
-                    style={{ color: item.profitLoss >= 0 ? 'var(--chart-green)' : 'var(--chart-red)' }}
-                  >
-                    {item.profitLoss >= 0 ? '+' : ''}
-                    {formatValue(item.profitLoss)} ({item.profitLossPercent.toFixed(2)}%)
-                  </td>
-                  <td className="px-6 py-5" style={mutedText}>
-                    <div>{item.date}</div>
-                    <div className="text-xs">{item.time}</div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
 
-        <div className="grid gap-4 p-4 lg:hidden">
-          {filteredData.map((item) => (
-            <article key={item.id} className="rounded-2xl border p-4" style={{ ...cardStyle, backgroundColor: 'var(--background)' }}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-mono text-base font-semibold">{item.asset}</p>
-                  <p className="mt-1 text-sm" style={mutedText}>{item.date} at {item.time}</p>
-                </div>
-                <div
-                  className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold"
-                  style={{
-                    backgroundColor: item.signal === 'BULLISH' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
-                    color: item.signal === 'BULLISH' ? 'var(--chart-green)' : 'var(--chart-red)',
-                  }}
-                >
-                  {item.signal === 'BULLISH' ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-                  {item.signal}
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p style={mutedText}>Confidence</p>
-                  <p className="mt-1 font-semibold">{item.confidence}%</p>
-                </div>
-                <div>
-                  <p style={mutedText}>P/L</p>
-                  <p className="mt-1 font-semibold" style={{ color: item.profitLoss >= 0 ? 'var(--chart-green)' : 'var(--chart-red)' }}>
-                    {item.profitLoss >= 0 ? '+' : ''}
-                    {formatValue(item.profitLoss)} ({item.profitLossPercent.toFixed(2)}%)
-                  </p>
-                </div>
-                <div>
-                  <p style={mutedText}>Entry</p>
-                  <p className="mt-1 font-mono">{formatValue(item.entry)}</p>
-                </div>
-                <div>
-                  <p style={mutedText}>Exit</p>
-                  <p className="mt-1 font-mono">{formatValue(item.exit)}</p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p style={mutedText}>Confidence</p>
+                        <p className="mt-1 font-semibold">{Math.round(item.confidence || 0)}%</p>
+                      </div>
+                      <div>
+                        <p style={mutedText}>RR</p>
+                        <p className="mt-1 font-semibold">{item.riskReward || '-'}</p>
+                      </div>
+                      <div>
+                        <p style={mutedText}>Entry</p>
+                        <p className="mt-1 font-mono">{formatValue(item.entry)}</p>
+                      </div>
+                      <div>
+                        <p style={mutedText}>Stop Loss</p>
+                        <p className="mt-1 font-mono">{formatValue(item.stopLoss)}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openDetail(item)}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-bold"
+                        style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item)}
+                        className="inline-flex items-center justify-center rounded-2xl px-3 py-2.5"
+                        style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: 'var(--chart-red)' }}
+                        aria-label="Delete analysis"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
+        )}
       </section>
+
+      {selectedAnalysis && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-4 backdrop-blur-sm">
+          <div className="mx-auto max-w-5xl">
+            <div className="rounded-[28px] border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--background)' }}>
+              <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b px-5 py-4" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--background)' }}>
+                <div>
+                  <h2 className="text-lg font-bold">Analysis Detail</h2>
+                  <p className="mt-1 text-sm" style={mutedText}>{selectedAnalysis.asset || 'Unknown'} / {selectedAnalysis.timeframe || 'Not detected'}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeDetail}
+                  className="flex h-10 w-10 items-center justify-center rounded-full"
+                  style={{ backgroundColor: 'var(--secondary)', color: 'var(--foreground)' }}
+                  aria-label="Close detail"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-5 p-4 sm:p-5">
+                {detailLoading && (
+                  <div className="rounded-2xl border p-5 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                    Loading analysis detail...
+                  </div>
+                )}
+                {detailError && (
+                  <div className="rounded-2xl border p-4 text-sm" style={{ borderColor: 'rgba(239,68,68,0.45)', color: 'var(--chart-red)' }}>
+                    {detailError}
+                  </div>
+                )}
+                <AnalysisDetail analysis={selectedAnalysis} compact />
+                <TradeAlertPanel analysis={selectedAnalysis} />
+                <TradeOutcomeForm
+                  analysisId={selectedAnalysis.id}
+                  tradeResult={selectedAnalysis.tradeResult}
+                  onSaved={handleOutcomeSaved}
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(selectedAnalysis)}
+                    className="inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold"
+                    style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: 'var(--chart-red)' }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Analysis
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,8 +8,9 @@ import {
   Target,
   Waves,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { chartUploadAnalysis } from '../data/smcMockData';
+import { getScreenshotReport } from '../lib/api';
 
 const cardStyle = {
   borderColor: 'var(--border)',
@@ -22,6 +23,54 @@ const insetStyle = {
 };
 
 export default function ScreenshotTradeReport() {
+  const [report, setReport] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let ignore = false;
+
+    getScreenshotReport()
+      .then((data) => {
+        if (!ignore) {
+          setReport(data);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err instanceof Error ? err.message : 'Unable to load screenshot report');
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  if (!report) {
+    return (
+      <div style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+        <div className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col items-center justify-center px-4 py-8 text-center">
+          <div className="rounded-[24px] border p-6" style={cardStyle}>
+            <h1 className="text-xl font-semibold tracking-[-0.03em]">
+              {error ? 'Report unavailable' : 'Loading screenshot report'}
+            </h1>
+            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--muted-foreground)' }}>
+              {error || 'Fetching the latest report from the backend.'}
+            </p>
+            <Link
+              to="/chat-analyzer"
+              className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)', color: 'var(--foreground)' }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Screenshot AI
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       <div className="mx-auto min-h-screen w-full max-w-[1120px] px-4 py-6 sm:px-5 md:px-7 md:py-8">
@@ -51,10 +100,10 @@ export default function ScreenshotTradeReport() {
         <section className="mb-4 rounded-[24px] border p-4 sm:p-5 md:rounded-[28px] md:p-6" style={cardStyle}>
           <div className="grid gap-4 md:grid-cols-4">
             {[
-              ['Asset', chartUploadAnalysis.asset],
-              ['Bias', chartUploadAnalysis.marketStructure.bias],
-              ['Entry', chartUploadAnalysis.execution.entryPrice],
-              ['R:R', chartUploadAnalysis.execution.riskRewardRatio],
+              ['Asset', report.asset],
+              ['Bias', report.marketStructure.bias],
+              ['Entry', report.execution.entryPrice],
+              ['R:R', report.execution.riskRewardRatio],
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl border p-4" style={insetStyle}>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
@@ -74,7 +123,7 @@ export default function ScreenshotTradeReport() {
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Market Structure</h2>
               </div>
               <div className="space-y-3">
-                {Object.entries(chartUploadAnalysis.marketStructure).map(([key, value]) => (
+                {Object.entries(report.marketStructure).map(([key, value]) => (
                   <div key={key} className="rounded-2xl border p-4" style={insetStyle}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                       {key.replace(/([A-Z])/g, ' $1')}
@@ -91,7 +140,7 @@ export default function ScreenshotTradeReport() {
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Zone Analysis</h2>
               </div>
               <div className="space-y-3">
-                {Object.entries(chartUploadAnalysis.zoneAnalysis).map(([key, values]) => (
+                {Object.entries(report.zoneAnalysis).map(([key, values]) => (
                   <div key={key} className="rounded-2xl border p-4" style={insetStyle}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                       {key.replace(/([A-Z])/g, ' $1')}
@@ -116,7 +165,7 @@ export default function ScreenshotTradeReport() {
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Liquidity Analysis</h2>
               </div>
               <div className="space-y-3">
-                {Object.entries(chartUploadAnalysis.liquidityAnalysis).map(([key, value]) => (
+                {Object.entries(report.liquidityAnalysis).map(([key, value]) => (
                   <div key={key} className="rounded-2xl border p-4" style={insetStyle}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                       {key.replace(/([A-Z])/g, ' $1')}
@@ -143,7 +192,7 @@ export default function ScreenshotTradeReport() {
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Trade Execution</h2>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {Object.entries(chartUploadAnalysis.execution).map(([key, value]) => (
+                {Object.entries(report.execution).map(([key, value]) => (
                   <div key={key} className="rounded-2xl border p-4" style={insetStyle}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                       {key.replace(/([A-Z])/g, ' $1')}
@@ -163,7 +212,7 @@ export default function ScreenshotTradeReport() {
               <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Why the Trade Was Analyzed This Way</h2>
             </div>
             <div className="space-y-3">
-              {Object.entries(chartUploadAnalysis.explanation).map(([key, value]) => (
+              {Object.entries(report.explanation).map(([key, value]) => (
                 <div key={key} className="rounded-2xl border p-4" style={insetStyle}>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                     {key.replace(/([A-Z])/g, ' $1')}
@@ -181,7 +230,7 @@ export default function ScreenshotTradeReport() {
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Confidence Engine</h2>
               </div>
               <div className="space-y-3">
-                {Object.entries(chartUploadAnalysis.confidenceEngine).map(([key, value]) => (
+                {Object.entries(report.confidenceEngine).map(([key, value]) => (
                   <div key={key} className="rounded-2xl border p-4" style={insetStyle}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                       {key.replace(/([A-Z])/g, ' $1')}
@@ -198,7 +247,7 @@ export default function ScreenshotTradeReport() {
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Rejected Entries</h2>
               </div>
               <div className="space-y-3">
-                {chartUploadAnalysis.rejectedEntries.map((entry) => (
+                {report.rejectedEntries.map((entry) => (
                   <div key={entry.label} className="rounded-2xl border p-4" style={insetStyle}>
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold">{entry.label}</p>

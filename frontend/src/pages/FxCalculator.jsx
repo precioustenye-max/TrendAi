@@ -16,17 +16,151 @@ const presets = [
   { label: "Aggressive", value: 5 },
 ];
 
-const volatilePairs = [
-  { symbol: "BTCUSD", pipSize: "1", pipValue: "1" },
-  { symbol: "XAUUSD", pipSize: "0.1", pipValue: "10" },
-  { symbol: "XAGUSD", pipSize: "0.01", pipValue: "50" },
-  { symbol: "GBPUSD", pipSize: "0.0001", pipValue: "10" },
-  { symbol: "GBPJPY", pipSize: "0.01", pipValue: "9.1" },
-  { symbol: "EURJPY", pipSize: "0.01", pipValue: "9.1" },
-  { symbol: "GBPCHF", pipSize: "0.0001", pipValue: "11.2" },
-  { symbol: "NAS100", pipSize: "1", pipValue: "1" },
-  { symbol: "US30", pipSize: "1", pipValue: "1" },
-  { symbol: "USOIL", pipSize: "0.01", pipValue: "10" },
+const instrumentProfiles = [
+  {
+    symbol: "EURUSD",
+    group: "Major FX",
+    volatility: "Low",
+    pipSize: "0.0001",
+    pipValue: "10",
+    defaultEntry: "1.08500",
+    suggestedStopPips: 20,
+    typicalRange: "50-90 pips/day",
+    recommendedRisk: 2,
+    note: "Cleaner spread and lower average movement than crosses or metals.",
+  },
+  {
+    symbol: "GBPUSD",
+    group: "Major FX",
+    volatility: "Medium",
+    pipSize: "0.0001",
+    pipValue: "10",
+    defaultEntry: "1.27000",
+    suggestedStopPips: 30,
+    typicalRange: "80-130 pips/day",
+    recommendedRisk: 1.5,
+    note: "Moves faster than EURUSD, so stops usually need more breathing room.",
+  },
+  {
+    symbol: "USDJPY",
+    group: "JPY FX",
+    volatility: "Medium",
+    pipSize: "0.01",
+    pipValue: "9.1",
+    defaultEntry: "157.80",
+    suggestedStopPips: 28,
+    typicalRange: "70-120 pips/day",
+    recommendedRisk: 1.5,
+    note: "JPY pairs use 0.01 pip size and can accelerate around news.",
+  },
+  {
+    symbol: "GBPJPY",
+    group: "JPY Cross",
+    volatility: "High",
+    pipSize: "0.01",
+    pipValue: "9.1",
+    defaultEntry: "201.50",
+    suggestedStopPips: 55,
+    typicalRange: "130-220 pips/day",
+    recommendedRisk: 1,
+    note: "A fast cross pair. Smaller risk and wider stops are usually safer.",
+  },
+  {
+    symbol: "EURJPY",
+    group: "JPY Cross",
+    volatility: "Medium-high",
+    pipSize: "0.01",
+    pipValue: "9.1",
+    defaultEntry: "170.30",
+    suggestedStopPips: 42,
+    typicalRange: "100-170 pips/day",
+    recommendedRisk: 1.25,
+    note: "More volatile than EURUSD because both EUR and JPY flows matter.",
+  },
+  {
+    symbol: "GBPCHF",
+    group: "FX Cross",
+    volatility: "Medium-high",
+    pipSize: "0.0001",
+    pipValue: "11.2",
+    defaultEntry: "1.13500",
+    suggestedStopPips: 38,
+    typicalRange: "80-150 pips/day",
+    recommendedRisk: 1.25,
+    note: "Cross-pair movement and pip value can make risk climb quickly.",
+  },
+  {
+    symbol: "XAUUSD",
+    group: "Metal",
+    volatility: "Very high",
+    pipSize: "0.1",
+    pipValue: "10",
+    defaultEntry: "2330.0",
+    suggestedStopPips: 80,
+    typicalRange: "150-350 points/day",
+    recommendedRisk: 1,
+    note: "Gold is sharp and wick-heavy. Smaller lot size is usually needed.",
+  },
+  {
+    symbol: "XAGUSD",
+    group: "Metal",
+    volatility: "High",
+    pipSize: "0.01",
+    pipValue: "50",
+    defaultEntry: "29.50",
+    suggestedStopPips: 45,
+    typicalRange: "60-160 points/day",
+    recommendedRisk: 1,
+    note: "Silver has a large pip value, so lots can become dangerous fast.",
+  },
+  {
+    symbol: "NAS100",
+    group: "Index",
+    volatility: "Very high",
+    pipSize: "1",
+    pipValue: "1",
+    defaultEntry: "18420",
+    suggestedStopPips: 120,
+    typicalRange: "200-600 points/day",
+    recommendedRisk: 0.75,
+    note: "Index volatility expands hard during US sessions and news.",
+  },
+  {
+    symbol: "US30",
+    group: "Index",
+    volatility: "Very high",
+    pipSize: "1",
+    pipValue: "1",
+    defaultEntry: "39120",
+    suggestedStopPips: 180,
+    typicalRange: "300-800 points/day",
+    recommendedRisk: 0.75,
+    note: "Large point moves mean smaller size is usually healthier.",
+  },
+  {
+    symbol: "USOIL",
+    group: "Commodity",
+    volatility: "High",
+    pipSize: "0.01",
+    pipValue: "10",
+    defaultEntry: "81.20",
+    suggestedStopPips: 70,
+    typicalRange: "120-300 points/day",
+    recommendedRisk: 1,
+    note: "Oil reacts sharply to inventory data and geopolitical headlines.",
+  },
+  {
+    symbol: "BTCUSD",
+    group: "Crypto",
+    volatility: "Extreme",
+    pipSize: "1",
+    pipValue: "1",
+    defaultEntry: "64180",
+    suggestedStopPips: 900,
+    typicalRange: "1,500-5,000 points/day",
+    recommendedRisk: 0.5,
+    note: "Crypto trades continuously and can gap through tight stops.",
+  },
 ];
 
 function toNumber(value) {
@@ -46,6 +180,12 @@ function formatNumber(value, digits = 2) {
   return new Intl.NumberFormat("en", {
     maximumFractionDigits: digits,
   }).format(value);
+}
+
+function buildStopLoss(entry, stopPips, pipSize, direction) {
+  const price = direction === "sell" ? entry + stopPips * pipSize : entry - stopPips * pipSize;
+  const digits = pipSize >= 1 ? 0 : pipSize >= 0.1 ? 1 : pipSize >= 0.01 ? 2 : 5;
+  return price.toFixed(digits);
 }
 
 function MetricCard({ icon, label, value, helper, tone = "default" }) {
@@ -93,11 +233,15 @@ export default function FxCalculator() {
     pair: "XAUUSD",
     accountBalance: "10",
     riskPercent: "1",
-    entryPrice: "1.08500",
-    stopLoss: "1.08300",
-    pipSize: "0.0001",
+    direction: "buy",
+    entryPrice: "2330.0",
+    stopLoss: "2322.0",
+    pipSize: "0.1",
     pipValue: "10",
   });
+
+  const selectedProfile =
+    instrumentProfiles.find((profile) => profile.symbol === values.pair) || instrumentProfiles[0];
 
   const results = useMemo(() => {
     const accountBalance = toNumber(values.accountBalance);
@@ -106,12 +250,20 @@ export default function FxCalculator() {
     const stopLoss = toNumber(values.stopLoss);
     const pipSize = toNumber(values.pipSize);
     const pipValue = toNumber(values.pipValue);
+    const recommendedRisk = selectedProfile.recommendedRisk;
 
     const riskAmount = accountBalance * (riskPercent / 100);
     const priceDistance = Math.abs(entryPrice - stopLoss);
     const stopPips = pipSize > 0 ? priceDistance / pipSize : 0;
     const lotSize = stopPips > 0 && pipValue > 0 ? riskAmount / (stopPips * pipValue) : 0;
     const microLots = lotSize * 100;
+    const recommendedRiskAmount = accountBalance * (recommendedRisk / 100);
+    const recommendedLotSize =
+      selectedProfile.suggestedStopPips > 0 && pipValue > 0
+        ? recommendedRiskAmount / (selectedProfile.suggestedStopPips * pipValue)
+        : 0;
+    const stopVsProfile =
+      selectedProfile.suggestedStopPips > 0 ? stopPips / selectedProfile.suggestedStopPips : 0;
 
     return {
       accountBalance,
@@ -120,23 +272,45 @@ export default function FxCalculator() {
       stopPips,
       lotSize,
       microLots,
-      isHighRisk: riskPercent > 2,
+      recommendedRisk,
+      recommendedRiskAmount,
+      recommendedLotSize,
+      stopVsProfile,
+      isHighRisk: riskPercent > recommendedRisk,
+      isStopTight: stopPips > 0 && stopPips < selectedProfile.suggestedStopPips * 0.6,
       isTooSmall: accountBalance > 0 && riskAmount < 0.1,
     };
-  }, [values]);
+  }, [selectedProfile, values]);
 
   const handleChange = (key, value) => {
     setValues((current) => ({ ...current, [key]: value }));
   };
 
   const handlePairChange = (symbol) => {
-    const selectedPair = volatilePairs.find((pair) => pair.symbol === symbol);
+    const selectedPair = instrumentProfiles.find((pair) => pair.symbol === symbol);
+    const entry = toNumber(selectedPair?.defaultEntry);
+    const pipSize = toNumber(selectedPair?.pipSize);
+    const stopLoss = buildStopLoss(entry, selectedPair?.suggestedStopPips || 0, pipSize, values.direction);
 
     setValues((current) => ({
       ...current,
       pair: symbol,
       pipSize: selectedPair?.pipSize || current.pipSize,
       pipValue: selectedPair?.pipValue || current.pipValue,
+      entryPrice: selectedPair?.defaultEntry || current.entryPrice,
+      stopLoss: stopLoss || current.stopLoss,
+    }));
+  };
+
+  const handleDirectionChange = (direction) => {
+    const entry = toNumber(values.entryPrice);
+    const pipSize = toNumber(values.pipSize);
+    const stopLoss = buildStopLoss(entry, selectedProfile.suggestedStopPips, pipSize, direction);
+
+    setValues((current) => ({
+      ...current,
+      direction,
+      stopLoss,
     }));
   };
 
@@ -215,7 +389,7 @@ export default function FxCalculator() {
                     color: "var(--foreground)",
                   }}
                 >
-                  {volatilePairs.map((pair) => (
+                  {instrumentProfiles.map((pair) => (
                     <option key={pair.symbol} value={pair.symbol}>
                       {pair.symbol}
                     </option>
@@ -257,11 +431,21 @@ export default function FxCalculator() {
           </div>
 
           <div className="mt-5 rounded-2xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--secondary)" }}>
-            <p className="text-sm font-bold">Risk guide</p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm font-bold">Risk guide</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--primary)" }}>
+                  {selectedProfile.group} / {selectedProfile.volatility} volatility
+                </p>
+              </div>
+              <span className="rounded-full px-3 py-1 text-xs font-bold" style={{ backgroundColor: "var(--card)", color: "var(--muted-foreground)" }}>
+                {selectedProfile.typicalRange}
+              </span>
+            </div>
             <p className="mt-2 text-sm leading-6" style={{ color: "var(--muted-foreground)" }}>
               For {values.pair}, with a {formatMoney(results.accountBalance)} account at{" "}
               {formatNumber(results.riskPercent)}% risk, you should risk{" "}
-              {formatMoney(results.riskAmount)} on one trade.
+              {formatMoney(results.riskAmount)} on one trade. {selectedProfile.note}
             </p>
           </div>
 
@@ -271,6 +455,34 @@ export default function FxCalculator() {
               Add entry and stop loss if you also want a suggested lot size.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  Direction
+                </span>
+                <div className="grid h-12 grid-cols-2 gap-2 rounded-2xl border p-1" style={{ borderColor: "var(--border)", backgroundColor: "var(--secondary)" }}>
+                  {[
+                    ["buy", "Buy"],
+                    ["sell", "Sell"],
+                  ].map(([value, label]) => {
+                    const isActive = values.direction === value;
+
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleDirectionChange(value)}
+                        className="rounded-xl text-sm font-bold transition"
+                        style={{
+                          backgroundColor: isActive ? "var(--primary)" : "transparent",
+                          color: isActive ? "var(--primary-foreground)" : "var(--foreground)",
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </label>
               {[
                 ["entryPrice", "Entry Price", "1.08500"],
                 ["stopLoss", "Stop Loss", "1.08300"],
@@ -312,16 +524,17 @@ export default function FxCalculator() {
             />
             <MetricCard
               icon={Percent}
-              label="Recommended Range"
-              value={`1% - 2%`}
-              helper={`${formatMoney(results.accountBalance * 0.01)} to ${formatMoney(results.accountBalance * 0.02)} per trade`}
+              label="Pair Risk Cap"
+              value={`Max ${formatNumber(results.recommendedRisk)}%`}
+              helper={`${formatMoney(results.recommendedRiskAmount)} suggested cap for ${values.pair}`}
               tone="primary"
             />
             <MetricCard
               icon={Gauge}
               label="Stop Distance"
               value={`${formatNumber(results.stopPips, 1)} pips`}
-              helper="Based on entry minus stop loss"
+              helper={`Profile stop: about ${formatNumber(selectedProfile.suggestedStopPips, 0)} pips`}
+              tone={results.isStopTight ? "warning" : "default"}
             />
             <MetricCard
               icon={Target}
@@ -333,13 +546,25 @@ export default function FxCalculator() {
             <MetricCard
               icon={ShieldCheck}
               label="Risk Status"
-              value={results.isHighRisk ? "Too high" : "Controlled"}
-              helper={results.isHighRisk ? "Try 1% to 2% for better survival." : "This is within a safer risk range."}
-              tone={results.isHighRisk ? "warning" : "default"}
+              value={results.isHighRisk || results.isStopTight ? "Needs caution" : "Controlled"}
+              helper={
+                results.isHighRisk
+                  ? `${values.pair} is better capped near ${formatNumber(results.recommendedRisk)}% risk.`
+                  : results.isStopTight
+                    ? "Your stop is tight compared with this pair's volatility profile."
+                    : "This fits the pair's volatility profile."
+              }
+              tone={results.isHighRisk || results.isStopTight ? "warning" : "default"}
+            />
+            <MetricCard
+              icon={Calculator}
+              label="Profile Lot Guide"
+              value={formatNumber(results.recommendedLotSize, 4)}
+              helper={`Uses ${formatNumber(results.recommendedRisk)}% risk and ${formatNumber(selectedProfile.suggestedStopPips, 0)} pips`}
             />
           </div>
 
-          {(results.isHighRisk || results.isTooSmall) && (
+          {(results.isHighRisk || results.isStopTight || results.isTooSmall) && (
             <div
               className="flex items-start gap-3 rounded-3xl border p-4"
               style={{
@@ -350,8 +575,10 @@ export default function FxCalculator() {
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" style={{ color: "var(--chart-yellow)" }} />
               <p className="text-sm leading-6" style={{ color: "var(--muted-foreground)" }}>
                 {results.isHighRisk
-                  ? "This risk percent can damage a small account quickly. Consider dropping it to 1% or 2%."
-                  : "The account is very small, so the calculated risk may be below the minimum your broker allows."}
+                  ? `${values.pair} is ${selectedProfile.volatility.toLowerCase()} volatility, so ${formatNumber(results.riskPercent)}% risk may be too aggressive. Consider ${formatNumber(results.recommendedRisk)}% or lower.`
+                  : results.isStopTight
+                    ? `The stop is much tighter than the ${values.pair} profile stop. A normal wick can hit it before the setup has room to work.`
+                    : "The account is very small, so the calculated risk may be below the minimum your broker allows."}
               </p>
             </div>
           )}

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
@@ -11,6 +10,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import { uploadChart as uploadChartToBackend } from "../lib/api";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const DAILY_ANALYSIS_LIMIT = 4;
@@ -62,9 +62,6 @@ export default function ChatAnalyzer() {
   const [tradeFocus, setTradeFocus] = useState("scalping");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const selectedCharts = Object.values(charts).filter(Boolean);
   const uploadedCharts = selectedCharts.filter((chart) => chart.status === "success");
@@ -165,31 +162,28 @@ export default function ChatAnalyzer() {
   };
 
   const uploadChart = async (slot, chart) => {
+    setCharts((prev) => ({
+      ...prev,
+      [slot.id]: prev[slot.id]
+        ? { ...prev[slot.id], progress: 35, status: "uploading" }
+        : prev[slot.id],
+    }));
+
     const formData = new FormData();
-    formData.append("file", chart.file);
-    formData.append("upload_preset", uploadPreset);
-    formData.append("folder", `trendai/chat-analyzer/${instrument.toLowerCase()}`);
-    formData.append(
-      "context",
-      `instrument=${instrument}|timeframe=${slot.timeframe}|focus=${tradeFocus}`
-    );
+    formData.append("timeframeHint", slot.timeframe);
+    formData.append("assetHint", instrument);
+    formData.append("tradeFocus", tradeFocus);
+    formData.append("chart", chart.file);
 
-    const response = await axios.post(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      formData,
-      {
-        onUploadProgress: (progressEvent) => {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    setCharts((prev) => ({
+      ...prev,
+      [slot.id]: prev[slot.id]
+        ? { ...prev[slot.id], progress: 75, status: "uploading" }
+        : prev[slot.id],
+    }));
 
-          setCharts((prev) => ({
-            ...prev,
-            [slot.id]: prev[slot.id]
-              ? { ...prev[slot.id], progress: percent, status: "uploading" }
-              : prev[slot.id],
-          }));
-        },
-      }
-    );
+    const result = await uploadChartToBackend(formData);
+    const upload = result.upload;
 
     setCharts((prev) => ({
       ...prev,
@@ -198,14 +192,19 @@ export default function ChatAnalyzer() {
             ...prev[slot.id],
             progress: 100,
             status: "success",
-            uploadedUrl: response.data.secure_url,
+            uploadedUrl: upload.publicUrl,
+            uploadId: upload.id,
+            analysis: result.analysis,
           }
         : prev[slot.id],
     }));
 
     return {
       timeframe: slot.timeframe,
-      url: response.data.secure_url,
+      url: upload.publicUrl,
+      uploadId: upload.id,
+      fileName: upload.originalName || upload.filename,
+      analysis: result.analysis,
     };
   };
 
@@ -219,39 +218,39 @@ export default function ChatAnalyzer() {
       setUploading(true);
       setError("");
 
-      const uploadedUrls =
-        cloudName && uploadPreset
-          ? await Promise.all(
-              chartSlots
-                .filter((slot) => charts[slot.id]?.status !== "success")
-                .map((slot) => uploadChart(slot, charts[slot.id]))
-            )
-          : chartSlots.map((slot) => ({
+      const uploadedUrls = await Promise.all(
+        chartSlots.map((slot) => {
+          const chart = charts[slot.id];
+
+          if (chart?.status === "success") {
+            return {
               timeframe: slot.timeframe,
-              url: charts[slot.id]?.preview,
-            }));
+              url: chart.uploadedUrl,
+              uploadId: chart.uploadId,
+              fileName: chart.file.name,
+              analysis: chart.analysis,
+            };
+          }
 
-      console.log("TrendAI analysis setup:", {
-        instrument,
-        tradeFocus,
-        charts: uploadedUrls,
-      });
+          return uploadChart(slot, chart);
+        })
+      );
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1500);
-      });
+      const preferredChart = uploadedUrls.find((chart) => chart.timeframe === "15M") || uploadedUrls[0];
+      const analysis = preferredChart.analysis;
 
       navigate("/trade-analysis", {
         state: {
           instrument,
           tradeFocus,
           charts: uploadedUrls,
-          analyzedAt: new Date().toISOString(),
+          analysis,
+          analyzedAt: analysis.analyzedAt,
         },
       });
     } catch (err) {
       console.error(err);
-      setError("Upload failed. Please try again.");
+      setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
 
       setCharts((prev) => ({
         fourHour:
@@ -629,12 +628,6 @@ export default function ChatAnalyzer() {
             )}
           </button>
 
-          <p
-            className="mt-4 text-center text-xs leading-5"
-            style={{ color: "var(--muted-foreground)" }}
-          >
-            This is not financial advice and should not be considered as such.
-          </p>
         </div>
       </section>
     </div>

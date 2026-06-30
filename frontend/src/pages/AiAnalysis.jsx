@@ -14,9 +14,17 @@ import {
   Target,
   TriangleAlert,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getAnalysisMarkets, runChartAnalysis } from '../lib/api';
 
 const marketOptions = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'EUR/USD', 'NASDAQ'];
+
+const iconByName = {
+  CandlestickChart,
+  Landmark,
+  Layers3,
+  LineChart,
+};
 
 const analysisByMarket = {
   'BTC/USDT': {
@@ -363,8 +371,72 @@ const analysisByMarket = {
 
 export default function AiAnalysis() {
   const [selectedMarket, setSelectedMarket] = useState('BTC/USDT');
-  const analysis = analysisByMarket[selectedMarket];
+  const [availableMarkets, setAvailableMarkets] = useState(marketOptions);
+  const [remoteAnalysis, setRemoteAnalysis] = useState(null);
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(true);
+  const [analysisError, setAnalysisError] = useState('');
+
+  const fallbackAnalysis = analysisByMarket[selectedMarket] || analysisByMarket['BTC/USDT'];
+  const analysis = remoteAnalysis || fallbackAnalysis;
   const isBullish = analysis.bias === 'Bullish';
+  const facts = analysis.biasFacts || analysis.bullishFacts || [];
+  const thesisSections = (analysis.thesisSections || []).map((section) => ({
+    ...section,
+    icon: typeof section.icon === 'string' ? iconByName[section.icon] || FileText : section.icon,
+  }));
+
+  useEffect(() => {
+    let ignore = false;
+
+    getAnalysisMarkets()
+      .then((markets) => {
+        if (!ignore && Array.isArray(markets) && markets.length > 0) {
+          setAvailableMarkets(markets.filter((market) => analysisByMarket[market]));
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setAvailableMarkets(marketOptions);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    runChartAnalysis({ market: selectedMarket })
+      .then((analysisResult) => {
+        if (!ignore) {
+          setRemoteAnalysis(analysisResult);
+        }
+      })
+      .catch((error) => {
+        if (!ignore) {
+          setRemoteAnalysis(null);
+          setAnalysisError(error instanceof Error ? error.message : 'Unable to load backend analysis');
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoadingAnalysis(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [selectedMarket]);
+
+  const selectMarket = (market) => {
+    setSelectedMarket(market);
+    setRemoteAnalysis(null);
+    setIsLoadingAnalysis(true);
+    setAnalysisError('');
+  };
 
   const signalCards = [
     { label: 'AI bias', value: analysis.bias, tone: analysis.biasTone },
@@ -402,7 +474,7 @@ export default function AiAnalysis() {
               }}
             >
               <Clock3 className="h-3.5 w-3.5" />
-              {analysis.bias} setup active
+              {isLoadingAnalysis ? 'Loading backend read' : `${analysis.bias} setup active`}
             </div>
           </div>
 
@@ -416,11 +488,11 @@ export default function AiAnalysis() {
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2.5">
-                {marketOptions.map((market) => (
+                {availableMarkets.map((market) => (
                   <button
                     key={market}
                     type="button"
-                    onClick={() => setSelectedMarket(market)}
+                    onClick={() => selectMarket(market)}
                     className="rounded-full px-4 py-2 text-sm font-semibold transition"
                     style={{
                       backgroundColor: selectedMarket === market ? 'var(--primary)' : 'var(--secondary)',
@@ -431,6 +503,12 @@ export default function AiAnalysis() {
                   </button>
                 ))}
               </div>
+
+              {analysisError ? (
+                <p className="mt-3 text-sm font-medium" style={{ color: 'var(--chart-red)' }}>
+                  {analysisError}
+                </p>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -567,7 +645,7 @@ export default function AiAnalysis() {
               <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Why the AI is {analysis.bias.toLowerCase()}</h2>
             </div>
             <div className="space-y-3">
-              {analysis.bullishFacts.map((item) => (
+              {facts.map((item) => (
                 <div key={item} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--secondary)' }}>
                   <p className="text-sm leading-6">{item}</p>
                 </div>
@@ -588,7 +666,7 @@ export default function AiAnalysis() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        {analysis.thesisSections.map((section) => {
+        {thesisSections.map((section) => {
           const Icon = section.icon;
           return (
             <div key={section.title} className="rounded-[30px] border p-5 md:p-6" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>

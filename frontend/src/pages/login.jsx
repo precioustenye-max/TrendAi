@@ -49,7 +49,13 @@ export default function LogIn() {
       setSuccessMessage('Login successful. Redirecting to dashboard...');
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in');
+      setErrorMessage(
+        error instanceof TypeError
+          ? `Cannot reach the backend API. Make sure the backend is running on ${API_BASE_URL}.`
+          : error instanceof Error
+            ? error.message
+            : 'Unable to sign in',
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -157,12 +157,14 @@ export default function Settings() {
               >
                 Save Changes
               </button>
+
               <button
                 className="inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition"
                 style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
               >
                 Update Profile
               </button>
+              
             </div>
           </SectionCard>
 
@@ -257,9 +259,9 @@ export default function Settings() {
                   className="w-full rounded-2xl border px-4 py-3 transition focus:border-primary focus:outline-none"
                 >
                   <option value="en">English</option>
-                  <option value="es">Espanol</option>
+                  {/* <option value="es">Espanol</option> */}
                   <option value="fr">Francais</option>
-                  <option value="de">Deutsch</option>
+                  {/* <option value="de">Deutsch</option> */}
                 </select>
               </div>
             </div>

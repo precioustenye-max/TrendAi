@@ -7,6 +7,8 @@ import {
   Send,
   Users,
 } from 'lucide-react';
+import { useState } from 'react';
+import { sendContactMessage } from '../lib/api';
 
 const contactMethods = [
   {
@@ -41,10 +43,36 @@ const socialLinks = [
 ];
 
 export default function Contact() {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
   const inputStyle = {
     borderColor: 'var(--border)',
     backgroundColor: 'var(--secondary)',
     color: 'var(--foreground)',
+  };
+
+  const updateField = (field, value) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setStatusMessage('');
+    setErrorMessage('');
+
+    try {
+      await sendContactMessage(formData);
+      setStatusMessage('Message sent. The TrendAI team will review it soon.');
+      setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to send message');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -140,27 +168,66 @@ export default function Contact() {
         </div>
 
         <form
+          onSubmit={handleSubmit}
           className="rounded-[28px] border p-5 sm:p-6"
           style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
         >
           <h2 className="text-xl font-bold">Send a message</h2>
           <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted-foreground)' }}>
-            This form is ready for backend wiring. For now, users can use the email or WhatsApp
-            links for direct contact.
+            Send feedback, report a bug, or request a feature directly to the backend.
           </p>
+
+          {statusMessage ? (
+            <div
+              className="mt-5 rounded-2xl border px-4 py-3 text-sm font-semibold"
+              style={{
+                borderColor: 'color-mix(in srgb, var(--primary) 34%, var(--border))',
+                backgroundColor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+                color: 'var(--primary)',
+              }}
+            >
+              {statusMessage}
+            </div>
+          ) : null}
+
+          {errorMessage ? (
+            <div
+              className="mt-5 rounded-2xl border px-4 py-3 text-sm font-semibold"
+              style={{
+                borderColor: 'color-mix(in srgb, var(--destructive) 34%, var(--border))',
+                backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+                color: 'var(--destructive)',
+              }}
+            >
+              {errorMessage}
+            </div>
+          ) : null}
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <label>
               <span className="mb-2 block text-sm font-semibold" style={{ color: 'var(--muted-foreground)' }}>
                 Name
               </span>
-              <input className="h-12 w-full rounded-2xl border px-4 outline-none" style={inputStyle} />
+              <input
+                className="h-12 w-full rounded-2xl border px-4 outline-none"
+                onChange={(event) => updateField('name', event.target.value)}
+                required
+                style={inputStyle}
+                value={formData.name}
+              />
             </label>
             <label>
               <span className="mb-2 block text-sm font-semibold" style={{ color: 'var(--muted-foreground)' }}>
                 Email
               </span>
-              <input type="email" className="h-12 w-full rounded-2xl border px-4 outline-none" style={inputStyle} />
+              <input
+                type="email"
+                className="h-12 w-full rounded-2xl border px-4 outline-none"
+                onChange={(event) => updateField('email', event.target.value)}
+                required
+                style={inputStyle}
+                value={formData.email}
+              />
             </label>
           </div>
 
@@ -168,16 +235,23 @@ export default function Contact() {
             <span className="mb-2 block text-sm font-semibold" style={{ color: 'var(--muted-foreground)' }}>
               Message
             </span>
-            <textarea className="min-h-40 w-full rounded-2xl border px-4 py-3 outline-none" style={inputStyle} />
+            <textarea
+              className="min-h-40 w-full rounded-2xl border px-4 py-3 outline-none"
+              onChange={(event) => updateField('message', event.target.value)}
+              required
+              style={inputStyle}
+              value={formData.message}
+            />
           </label>
 
           <button
-            type="button"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold sm:w-auto"
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
           >
             <Send className="h-4 w-4" />
-            Send Message
+            {isSubmitting ? 'Sending...' : 'Send Message'}
           </button>
         </form>
       </section>
